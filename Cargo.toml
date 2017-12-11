@@ -1,0 +1,6 @@
+[package]
+name = "rustcalc"
+version = "0.1.0"
+authors = ["Raghav Shankar <warpspeedscp@gmail.com>"]
+
+[dependencies]
