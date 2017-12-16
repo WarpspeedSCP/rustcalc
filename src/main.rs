@@ -10,6 +10,7 @@ fn main() {
     let a = get_line(
         &String::from("herp >>"),
         &mut std::io::stdout().into_raw_mode().unwrap(),
+        &mut std::io::stdin(),
     );
 
     println!("{}", a)

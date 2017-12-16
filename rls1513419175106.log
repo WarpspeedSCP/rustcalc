@@ -175,3 +175,601 @@ error: expected identifier, found keyword `fn`
 3 | fn main() {
   | ^^
 
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+error: expected `where`, `{`, `(`, or `;` after struct name, found `pub`
+ --> bogofile:3:1
+  |
+3 | pub fn get_line(prompt: &String, terminal: &mut RawTerminal<Stdout>) -> String ;
+  | ^^^
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'Box<Any>', /checkout/src/librustc_errors/lib.rs:448:8
+
+error: expected one of `.`, `;`, `?`, or an operator, found `out`
+  --> stdin:45:5
+   |
+43 |     }
+   |      - expected one of `.`, `;`, `?`, or an operator here
+44 | 
+45 |     out
+   |     ^^^ unexpected token
+
+error: expected one of `.`, `;`, `?`, or an operator, found `out`
+  --> stdin:45:5
+   |
+43 |     }
+   |      - expected one of `.`, `;`, `?`, or an operator here
+44 | 
+45 |     out
+   |     ^^^ unexpected token
+
+error: internal compiler error: unexpected panic
+
+note: the compiler unexpectedly panicked. this is a bug.
+
+note: we would appreciate a bug report: https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md#bug-reports
+
+note: rustc 1.24.0-nightly (2d4df9584 2017-12-10) running on x86_64-unknown-linux-gnu
+
+thread 'rustc' panicked at 'called `Option::unwrap()` on a `None` value', /checkout/src/libcore/option.rs:335:20
+
+error: this file contains an un-closed delimiter
+  --> stdin:57:3
+   |
+57 | }
+   |   ^
+   |
+help: did you mean to close this delimiter?
+  --> stdin:24:95
+   |
+24 | pub fn get_line(prompt: &String, terminal: &mut RawTerminal<Stdout>, input : Stdin) -> String {
+   |                                                                                               ^
+
+error: expected one of `,`, `.`, `?`, `}`, or an operator, found `;`
+  --> stdin:52:23
+   |
+52 |             _ => break;
+   |                       ^ expected one of `,`, `.`, `?`, `}`, or an operator here
+
+error: this file contains an un-closed delimiter
+  --> stdin:58:3
+   |
+58 | }
+   |   ^
+   |
+help: did you mean to close this delimiter?
+  --> stdin:24:100
+   |
+24 | pub fn get_line(prompt: &String, terminal: &mut RawTerminal<Stdout>, input : &mut Stdin) -> String {
+   |                                                                                                    ^
+
+thread 'request-worker-0' panicked at 'byte index 18446744073709551615 is out of bounds of `extern crate termion;
+
+use termion::raw::RawTerminal;
+use termion::raw::IntoRawMode;
+use termion::input::TermRead;
+use termion::event::Key;
+
+use std::io::{Read, stdin, Stdin, Stdout, Write};
+
+struct point{
+    x: u16,
+    y: u16
+}
+
+impl point{
+    pub fn n`[...]', /checkout/src/libcore/str/mod.rs:2217:8
+thread 'request-worker-3' panicked at 'byte index 18446744073709551615 is out of bounds of `extern crate termion;
+
+use termion::raw::RawTerminal;
+use termion::raw::IntoRawMode;
+use termion::input::TermRead;
+use termion::event::Key;
+
+use std::io::{Read, stdin, Stdin, Stdout, Write};
+
+struct point{
+    x: u16,
+    y: u16
+}
+
+impl point{
+    pub fn n`[...]', /checkout/src/libcore/str/mod.rs:2217:8
+thread 'request-worker-1' panicked at 'byte index 18446744073709551615 is out of bounds of `extern crate termion;
+
+use termion::raw::RawTerminal;
+use termion::raw::IntoRawMode;
+use termion::input::TermRead;
+use termion::event::Key;
+
+use std::io::{stdin, Read, Stdin, Stdout, Write};
+
+struct point {
+    x: u16,
+    y: u16,
+}
+
+impl point {
+    pub f`[...]', /checkout/src/libcore/str/mod.rs:2217:8
+thread 'request-worker-3' panicked at 'byte index 18446744073709551615 is out of bounds of `extern crate termion;
+
+use termion::raw::RawTerminal;
+use termion::raw::IntoRawMode;
+use termion::input::TermRead;
+use termion::event::Key;
+
+use std::io::{stdin, Read, Stdin, Stdout, Write};
+
+struct point {
+    x: u16,
+    y: u16,
+}
+
+impl point {
+    pub f`[...]', /checkout/src/libcore/str/mod.rs:2217:8
+thread 'request-worker-1' panicked at 'byte index 18446744073709551615 is out of bounds of `extern crate termion;
+
+use termion::raw::RawTerminal;
+use termion::raw::IntoRawMode;
+use termion::input::TermRead;
+use termion::event::Key;
+
+use std::io::{stdin, Read, Stdin, Stdout, Write};
+
+struct point {
+    x: u16,
+    y: u16,
+}
+
+impl point {
+    pub f`[...]', /checkout/src/libcore/str/mod.rs:2217:8
+thread 'request-worker-1' panicked at 'byte index 18446744073709551615 is out of bounds of `extern crate termion;
+
+use termion::raw::RawTerminal;
+use termion::raw::IntoRawMode;
+use termion::input::TermRead;
+use termion::event::Key;
+
+use std::io::{stdin, Read, Stdin, Stdout, Write};
+
+struct point {
+    x: u16,
+    y: u16,
+}
+
+impl point {
+    pub f`[...]', /checkout/src/libcore/str/mod.rs:2217:8
