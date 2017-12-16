@@ -1,6 +1,5 @@
 extern crate termion;
 
-fn main() {
+use io;
 
-    
-}
+fn main() {}
