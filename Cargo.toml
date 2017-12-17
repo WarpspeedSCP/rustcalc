@@ -5,3 +5,4 @@ authors = ["Raghav Shankar <warpspeedscp@gmail.com>"]
 
 [dependencies]
 termion = "*"
+scribe = "*"

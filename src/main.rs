@@ -7,11 +7,27 @@ mod io;
 use io::get_line;
 
 fn main() {
-    let a = get_line(
-        &String::from("herp >>"),
-        &mut std::io::stdout().into_raw_mode().unwrap(),
-        &mut std::io::stdin(),
-    );
+    let mut history: Vec<String> = Vec::new();
+    let mut a: String = String::new();
 
-    println!("{}", a)
+    {
+        let mut input = std::io::stdin();
+        let mut terminal = std::io::stdout().into_raw_mode().unwrap();
+
+        while a != String::from("exit") {
+            a = get_line(
+                &String::from("herp >>"),
+                &mut terminal,
+                &mut input,
+                &mut history,
+            );
+        }
+    }
+
+
+    println!("\n");
+
+    for x in history.iter() {
+        println!("{}", x);
+    }
 }
