@@ -62,9 +62,9 @@ pub fn get_line(
             Key::Right => handle_right(terminal),
             Key::Up => handle_up(terminal, history, &mut out.to_string()),
             Key::Down => handle_down(terminal, history, &mut out.to_string()),
-            //           Key::Backspace => handle_bkspc(),
-            //          Key::Delete => handle_del(),
-            //          Key::Insert => handle_ins(),
+            Key::Backspace => handle_bkspc(),
+            Key::Delete => handle_del(),
+            Key::Insert => handle_ins(),
             _ => continue,
         }
     }
@@ -95,4 +95,10 @@ fn handle_left(
     Goto(pos.x, pos.y);
 }
 
+
+
 fn handle_right(terminal: &mut RawTerminal<Stdout>) {}
+
+fn handle_bkspc() {}
+fn handle_del() {}
+fn handle_ins() {}
