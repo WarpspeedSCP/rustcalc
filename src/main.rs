@@ -9,6 +9,7 @@ use io::get_line;
 fn main() {
     let mut history: Vec<String> = Vec::new();
     let mut a: String = String::new();
+    let mut insert = false;
 
     {
         let mut input = std::io::stdin();
@@ -20,6 +21,7 @@ fn main() {
                 &mut terminal,
                 &mut input,
                 &mut history,
+                &mut insert,
             );
         }
     }
