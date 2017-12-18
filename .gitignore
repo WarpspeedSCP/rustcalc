@@ -6,3 +6,4 @@
 *.log
 *ml
 *.json
+.vscode/
