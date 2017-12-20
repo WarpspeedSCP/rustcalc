@@ -1,6 +1,7 @@
 extern crate termion;
 
 use termion::raw::IntoRawMode;
+use std::io::Write;
 
 mod io;
 
@@ -14,6 +15,9 @@ fn main() {
     {
         let mut input = std::io::stdin();
         let mut terminal = std::io::stdout().into_raw_mode().unwrap();
+        let mut p: io::point = io::point::new(1, 1);
+
+        write!(terminal, "{}", termion::clear::All);
 
         while a != String::from("exit") {
             a = get_line(
@@ -22,6 +26,7 @@ fn main() {
                 &mut input,
                 &mut history,
                 &mut insert,
+                &mut p,
             );
         }
     }
