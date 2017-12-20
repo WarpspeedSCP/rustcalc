@@ -41,6 +41,7 @@ pub fn get_line(
     let mut out: scribe::buffer::GapBuffer = scribe::buffer::GapBuffer::new(String::from(""));
     pos.x = prompt.len() as u16;
     let pl = prompt.len() as u16;
+    let mut hIndex = history.len();
 
     for c in input.keys() {
         if pos.x <= pl {
@@ -132,10 +133,10 @@ pub fn get_line(
                 }
                 handle_ctrl(c, terminal)
             }
-            Key::Left => handle_left(terminal, pos, pl),
-            Key::Right => handle_right(terminal, &mut out.to_string(), pos, pl),
-            Key::Up => handle_up(terminal, history, &mut out.to_string()),
-            Key::Down => handle_down(terminal, history, &mut out.to_string()),
+            Key::Left => handle_left(terminal, pos, &pl),
+            Key::Right => handle_right(terminal, &mut out.to_string(), pos, &pl),
+            Key::Up => {}
+            Key::Down => {}
 
             Key::Backspace => {
                 if !out.to_string().is_empty() {
@@ -154,7 +155,7 @@ pub fn get_line(
                         ));
                     } //Erase preceding character
 
-                    if (pos.x - pl > 0) {
+                    if pos.x - pl > 0 {
                         write!(
                             terminal,
                             "{}{}{}{}{}{}",
@@ -191,10 +192,8 @@ pub fn get_line(
 
 fn handle_alt(c: char) {}
 fn handle_ctrl(c: char, terminal: &mut RawTerminal<Stdout>) {}
-fn handle_up(terminal: &mut RawTerminal<Stdout>, history: &mut Vec<String>, line: &mut String) {}
-fn handle_down(terminal: &mut RawTerminal<Stdout>, history: &mut Vec<String>, line: &mut String) {}
 
-fn handle_left(terminal: &mut RawTerminal<Stdout>, pos: &mut point, promptLength: u16) {
+fn handle_left(terminal: &mut RawTerminal<Stdout>, pos: &mut point, promptLength: &u16) {
     if pos.x - promptLength > 0 {
         pos.x -= 1;
         write!(terminal, "{}", Goto(pos.x + 1, pos.y)).unwrap();
@@ -207,7 +206,7 @@ fn handle_right(
     terminal: &mut RawTerminal<Stdout>,
     line: &mut String,
     pos: &mut point,
-    promptLength: u16,
+    promptLength: &u16,
 ) {
     if pos.x - promptLength < line.len() as u16 {
         pos.x += 1;
