@@ -28,6 +28,12 @@ fn main() {
                 &mut insert,
                 &mut p,
             );
+
+            for i in 0..history.len() - 1 {
+                if history[i] == "" {
+                    history.remove(i);
+                }
+            }
         }
     }
 

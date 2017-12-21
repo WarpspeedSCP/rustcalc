@@ -53,6 +53,7 @@ pub fn get_line(
         match c.unwrap() {
             // Exit.
             Key::Char('\n') => {
+                history.push(out.to_string());
                 pos.y += 1;
                 break;
             }
@@ -135,9 +136,73 @@ pub fn get_line(
             }
             Key::Left => handle_left(terminal, pos, &pl),
             Key::Right => handle_right(terminal, &mut out.to_string(), pos, &pl),
-            Key::Up => {}
-            Key::Down => {}
+            Key::Up => {
+                if !history.is_empty() {
+                    if hIndex > 0 {
+                        if hIndex == history.len() {
+                            history.push(out.to_string());
+                        } else if history[hIndex - 1] == "" || history[hIndex - 1] == " " {
+;
+                        }
+                        let d = out.to_string().len();
+                        out.delete(&scribe::buffer::Range::new(
+                            scribe::buffer::Position { line: 0, offset: 0 },
+                            scribe::buffer::Position { line: 0, offset: d },
+                        ));
 
+                        out.insert(
+                            &history[hIndex - 1],
+                            &scribe::buffer::Position { line: 0, offset: 0 },
+                        );
+
+
+                        hIndex -= 1;
+                    }
+                    pos.x = pl + out.to_string().len() as u16;
+                    write!(
+                        terminal,
+                        "{}{}{}{}{}{}",
+                        termion::clear::CurrentLine,
+                        Goto(1, pos.y),
+                        prompt,
+                        Goto(pl + 1, pos.y),
+                        out.to_string(),
+                        Goto(pos.x + 1, pos.y)
+                    ).unwrap();
+                }
+            }
+            Key::Down => {
+                if !history.is_empty() {
+                    if hIndex < history.len() {
+                        let d = out.to_string().len();
+                        out.delete(&scribe::buffer::Range::new(
+                            scribe::buffer::Position { line: 0, offset: 0 },
+                            scribe::buffer::Position { line: 0, offset: d },
+                        ));
+
+                        if hIndex != history.len() - 1 {
+                            hIndex += 1
+                        } else {
+                            hIndex = history.len() - 1;
+                        }
+                        out.insert(
+                            &history[hIndex],
+                            &scribe::buffer::Position { line: 0, offset: 0 },
+                        );
+                    }
+                    pos.x = pl + out.to_string().len() as u16;
+                    write!(
+                        terminal,
+                        "{}{}{}{}{}{}",
+                        termion::clear::CurrentLine,
+                        Goto(1, pos.y),
+                        prompt,
+                        Goto(pl + 1, pos.y),
+                        out.to_string(),
+                        Goto(pos.x + 1, pos.y)
+                    ).unwrap();
+                }
+            }
             Key::Backspace => {
                 if !out.to_string().is_empty() {
                     if pos.x - pl == 0 {
@@ -184,9 +249,6 @@ pub fn get_line(
 
     write!(terminal, "\n{}", termion::clear::CurrentLine).unwrap();
     terminal.flush().unwrap();
-
-    history.push(out.to_string());
-
     out.to_string()
 }
 
