@@ -8,3 +8,4 @@
 *.json
 .vscode/
 .vscode/launch.json
+Cargo.lock
