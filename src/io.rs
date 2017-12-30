@@ -41,7 +41,7 @@ pub fn get_line(
     let mut out: scribe::buffer::GapBuffer = scribe::buffer::GapBuffer::new(String::from(""));
     pos.x = prompt.len() as u16;
     let pl = prompt.len() as u16;
-    let mut hIndex = history.len();
+    let mut h_index = history.len();
 
     for c in input.keys() {
         if pos.x <= pl {
@@ -138,10 +138,10 @@ pub fn get_line(
             Key::Right => handle_right(terminal, &mut out.to_string(), pos, &pl),
             Key::Up => {
                 if !history.is_empty() {
-                    if hIndex > 0 {
-                        if hIndex == history.len() {
+                    if h_index > 0 {
+                        if h_index == history.len() {
                             history.push(out.to_string());
-                        } else if history[hIndex - 1] == "" || history[hIndex - 1] == " " {
+                        } else if history[h_index - 1] == "" || history[h_index - 1] == " " {
 ;
                         }
                         let d = out.to_string().len();
@@ -151,12 +151,11 @@ pub fn get_line(
                         ));
 
                         out.insert(
-                            &history[hIndex - 1],
+                            &history[h_index - 1],
                             &scribe::buffer::Position { line: 0, offset: 0 },
                         );
 
-
-                        hIndex -= 1;
+                        h_index -= 1;
                     }
                     pos.x = pl + out.to_string().len() as u16;
                     write!(
@@ -173,20 +172,20 @@ pub fn get_line(
             }
             Key::Down => {
                 if !history.is_empty() {
-                    if hIndex < history.len() {
+                    if h_index < history.len() {
                         let d = out.to_string().len();
                         out.delete(&scribe::buffer::Range::new(
                             scribe::buffer::Position { line: 0, offset: 0 },
                             scribe::buffer::Position { line: 0, offset: d },
                         ));
 
-                        if hIndex != history.len() - 1 {
-                            hIndex += 1
+                        if h_index != history.len() - 1 {
+                            h_index += 1
                         } else {
-                            hIndex = history.len() - 1;
+                            h_index = history.len() - 1;
                         }
                         out.insert(
-                            &history[hIndex],
+                            &history[h_index],
                             &scribe::buffer::Position { line: 0, offset: 0 },
                         );
                     }
@@ -261,8 +260,6 @@ fn handle_left(terminal: &mut RawTerminal<Stdout>, pos: &mut point, promptLength
         write!(terminal, "{}", Goto(pos.x + 1, pos.y)).unwrap();
     }
 }
-
-
 
 fn handle_right(
     terminal: &mut RawTerminal<Stdout>,
