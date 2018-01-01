@@ -1,13 +1,11 @@
 extern crate termion;
 
-#[macro_use]
-extern crate lazy_static;
-
 use termion::raw::IntoRawMode;
 use std::io::Write;
 
 mod io;
 mod parser;
+mod ast;
 
 use io::get_line;
 
