@@ -1,13 +1,9 @@
 extern crate std;
 
 use std::mem::discriminant;
-use std::str::Chars;
+use lazy_static::LazyStatic;
 
-use itertools::PeekingNext;
-use itertools;
-use itertools::Itertools;
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq)]
 enum Op {
     Add,
     Sub,
@@ -21,36 +17,57 @@ enum Op {
     Geq,
     Leq,
     Neq,
+    And,
+    Or_,
+    Not,
+    BitAnd,
+    BitOr,
+    BitNot,
+    BitXor,
+    LLS,
+    LRS,
+    ARS,
+    Assign,
+    Comma,
+    LParens,
+    RParens,
     Any,
+}
+
+impl PartialEq for Op {
+    fn eq(&self, other: &Op) -> bool {
+        discriminant(self) == discriminant(other)
+    }
 }
 
 #[derive(Clone, Debug)]
 enum Token {
-    Number(u32),
+    Number(f32),
     Operator(Op),
-    UnaryFn(fn(u32) -> u32),
-    BinaryFn(fn(u32, u32) -> u32, u64),
+    UnaryFn(fn(f32) -> f32),
+    BinaryFn(fn(f32, f32) -> f32),
     Var(String),
+    Other(char),
     None,
 }
 
 impl PartialEq for Token {
     fn eq(&self, other: &Token) -> bool {
-        if discriminant(self) == discriminant(other) {
-            true
-        } else {
-            false
+        match (self, other) {
+            (&Token::Operator(ref x), &Token::Operator(ref y)) => x == y,
+            _ => discriminant(self) == discriminant(other),
         }
     }
 }
 
+#[derive(Debug)]
 pub struct Parser {
     pos: usize,
     base: u32,
     ans: Token,
 }
 
-impl<'a> Parser {
+impl Parser {
     pub fn new() -> Parser {
         Parser {
             base: 10,
@@ -63,50 +80,64 @@ impl<'a> Parser {
         self.base = base;
     }
 
-    fn get_number(&mut self, input: &[u8]) -> u32 {
+    fn get_number(&mut self, input: &[u8]) -> f32 {
         let mut num: String = "".into();
 
-        while self.pos < input.len() && (input[self.pos] as char).is_digit(self.base) {
+        while self.pos < input.len()
+            && ((input[self.pos] as char).is_digit(self.base) || input[self.pos] as char == '.')
+        {
             num.push(input[self.pos] as char);
             self.pos += 1;
         }
 
-        num.parse().unwrap()
+        match num.parse() {
+            Ok(val) => val,
+            Err(e) => panic!("\"{}\" is not a number!", num),
+        }
     }
 
-    fn get_next(&mut self, input: &[u8]) {
+    fn get_next(&mut self, input: &[u8]) -> Token {
         if !(self.pos < input.len()) {
             self.ans = Token::None;
-            return;
+            return self.ans.clone();
         }
 
         let mut ch = input[self.pos] as char;
 
         if ch == ' ' {
             while ch == ' ' {
-                self.pos += 1;
+                if self.pos < (input.len() - 1) {
+                    self.pos += 1;
+                } else {
+                    return Token::Other(ch);
+                }
                 ch = input[self.pos] as char;
             }
         }
 
-        self.ans = if ch.is_digit(self.base) {
-            Token::Number(self.get_number(input))
+        if ch.is_digit(self.base) || ch == '.' {
+            self.ans = Token::Number(self.get_number(input))
         } else {
             //if !ch.is_alphanumeric() {
             self.pos += 1;
-            match ch {
+            self.ans = match ch {
                 '+' => Token::Operator(Op::Add),
                 '-' => Token::Operator(Op::Sub),
                 '*' => Token::Operator(Op::Mul),
                 '/' => Token::Operator(Op::Div),
-                _ => return,
-            }
+                '^' => Token::Operator(Op::Pow),
+                '(' => Token::Operator(Op::LParens),
+                ')' => Token::Operator(Op::RParens),
+                _ => Token::Other(ch),
+            };
         }
+
+        self.ans.clone()
     }
 
     fn eat(&mut self, token: Token, input: &[u8]) {
         if self.ans == token {
-            self.get_next(input);
+            self.ans = self.get_next(input);
         } else {
             panic!(
                 "Parse error! Expected {:?}, got {:?} at position {}!",
@@ -120,26 +151,133 @@ impl<'a> Parser {
         self.ans = Token::None;
     }
 
-    pub fn expr(&mut self, input: &'a str) -> u32 {
+    fn term(&mut self, input: &[u8]) -> Token {
+        let mut res = self.pow_factor(input);
+        let mut tok = Token::None;
+
+        while match self.ans {
+            Token::Operator(Op::Mul) => true,
+            Token::Operator(Op::Div) => true,
+            _ => false,
+        } {
+            tok = self.ans.clone();
+            match tok {
+                Token::Operator(Op::Mul) => {
+                    self.eat(Token::Operator(Op::Mul), input);
+                    res = match (res, self.pow_factor(input)) {
+                        (Token::Number(x), Token::Number(y)) => Token::Number(x * y),
+                        _ => panic!("Unable to multiply at position {}", self.pos),
+                    }
+                }
+
+                Token::Operator(Op::Div) => {
+                    self.eat(Token::Operator(Op::Div), input);
+                    res = match (res, self.pow_factor(input)) {
+                        (Token::Number(x), Token::Number(y)) => if y != 0.0 {
+                            Token::Number(x / y)
+                        } else {
+                            panic!("Divide by zero at {}!", self.pos)
+                        },
+                        _ => panic!("Unable to divide at position {}", self.pos),
+                    }
+                }
+
+                _ => panic!(
+                    "Expected {:?} but got {:?} at position {}!",
+                    Token::Operator(Op::Any),
+                    tok,
+                    self.pos
+                ),
+            }
+        }
+
+        res
+    }
+
+    fn pow_factor(&mut self, input: &[u8]) -> Token {
+        let mut res = self.factor(input);
+
+        while match self.ans {
+            Token::Operator(Op::Pow) => true,
+            _ => false,
+        } {
+            //self.eat(Token::Operator(Op::Pow), input);
+            res = match (res, self.pow_factor(input)) {
+                (Token::Number(x), Token::Number(y)) => Token::Number(x.powi(y as i32)),
+                _ => Token::None,
+            }
+        }
+
+        res
+    }
+
+    fn factor(&mut self, input: &[u8]) -> Token {
+        let mut t = self.ans.clone();
+        if t == Token::Number(0.00) {
+            self.eat(Token::Number(0.0), input);
+        } else {
+            match t {
+                Token::Operator(Op::LParens) => {
+                    self.eat(Token::Operator(Op::LParens), input);
+                    t = self.expr(input);
+                    self.eat(Token::Operator(Op::RParens), input);
+                }
+                Token::Operator(Op::Pow) => {
+                    self.eat(Token::Operator(Op::Pow), input);
+                    t = self.pow_factor(input);
+                }
+                _ => return Token::None,
+            };
+        }
+        t
+    }
+
+    fn expr(&mut self, input: &[u8]) -> Token {
+        let mut tok = Token::None;
+
+        let mut res = self.term(input);
+
+        while match self.ans.clone() {
+            Token::Operator(Op::Add) => true,
+            Token::Operator(Op::Sub) => true,
+            _ => false,
+        } {
+            tok = self.ans.clone();
+
+            res = match tok {
+                Token::Operator(Op::Add) => {
+                    self.eat(Token::Operator(Op::Add), input);
+                    match (res, self.term(input)) {
+                        (Token::Number(x), Token::Number(y)) => Token::Number(x + y),
+                        _ => Token::None,
+                    }
+                }
+                Token::Operator(Op::Sub) => {
+                    self.eat(Token::Operator(Op::Sub), input);
+                    match (res, self.term(input)) {
+                        (Token::Number(x), Token::Number(y)) => Token::Number(x - y),
+                        _ => Token::None,
+                    }
+                }
+                _ => panic!(
+                    "Expected {:?} but got {:?} at position {}!",
+                    Token::Operator(Op::Any),
+                    tok,
+                    self.pos
+                ),
+            }
+        }
+
+        res
+    }
+
+    pub fn eval(&mut self, input: &[u8]) -> f32 {
         self.reset();
+        self.get_next(input);
 
-        self.eat(Token::None, input.as_bytes());
-
-        let left = self.ans.clone();
-        self.eat(Token::Number(0), input.as_bytes());
-
-        let op = self.ans.clone();
-        self.eat(Token::Operator(Op::Any), input.as_bytes());
-
-        let right = self.ans.clone();
-        self.eat(Token::Number(0), input.as_bytes());
-
-        match (left, op, right) {
-            (Token::Number(x), Token::Operator(Op::Add), Token::Number(y)) => x + y,
-            (Token::Number(x), Token::Operator(Op::Sub), Token::Number(y)) => x - y,
-            (Token::Number(x), Token::Operator(Op::Mul), Token::Number(y)) => x * y,
-            (Token::Number(x), Token::Operator(Op::Div), Token::Number(y)) => x / y,
-            _ => 0,
+        match self.expr(input) {
+            Token::Number(x) => x,
+            _ => std::f32::NAN,
         }
     }
 }

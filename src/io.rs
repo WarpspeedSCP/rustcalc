@@ -9,14 +9,14 @@ use termion::cursor::Goto;
 
 use std::io::{Stdin, Stdout, Write};
 
-pub struct point {
+pub struct Point {
     pub x: u16,
     pub y: u16,
 }
 
-impl point {
-    pub fn new(x: u16, y: u16) -> point {
-        point { x: x, y: y }
+impl Point {
+    pub fn new(x: u16, y: u16) -> Point {
+        Point { x: x, y: y }
     }
 }
 
@@ -26,7 +26,7 @@ pub fn get_line(
     input: &mut Stdin,
     history: &mut Vec<String>,
     insert: &mut bool,
-    pos: &mut point,
+    pos: &mut Point,
 ) -> String {
     write!(
         terminal,
@@ -254,8 +254,8 @@ pub fn get_line(
 fn handle_alt(c: char) {}
 fn handle_ctrl(c: char, terminal: &mut RawTerminal<Stdout>) {}
 
-fn handle_left(terminal: &mut RawTerminal<Stdout>, pos: &mut point, promptLength: &u16) {
-    if pos.x - promptLength > 0 {
+fn handle_left(terminal: &mut RawTerminal<Stdout>, pos: &mut Point, prompt_length: &u16) {
+    if pos.x - prompt_length > 0 {
         pos.x -= 1;
         write!(terminal, "{}", Goto(pos.x + 1, pos.y)).unwrap();
     }
@@ -264,10 +264,10 @@ fn handle_left(terminal: &mut RawTerminal<Stdout>, pos: &mut point, promptLength
 fn handle_right(
     terminal: &mut RawTerminal<Stdout>,
     line: &mut String,
-    pos: &mut point,
-    promptLength: &u16,
+    pos: &mut Point,
+    prompt_length: &u16,
 ) {
-    if pos.x - promptLength < line.len() as u16 {
+    if pos.x - prompt_length < line.len() as u16 {
         pos.x += 1;
         write!(terminal, "{}", Goto(pos.x + 1, pos.y)).unwrap();
     }
