@@ -30,10 +30,4 @@ impl Node {
         self.val = v;
         self
     }
-
-    /*    pub fn insert(&mut self, value: &Token) {
-        match value {
-            &Token::Number(0.0) => 
-        }
-    }*/
 }

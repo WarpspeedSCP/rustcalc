@@ -12,6 +12,8 @@ pub enum Op {
     Div,
     Mod,
     Pow,
+    Pos,
+    Neg,
     Eq_,
     Gt_,
     Lt_,
@@ -55,6 +57,7 @@ pub enum Token {
 impl PartialEq for Token {
     fn eq(&self, other: &Token) -> bool {
         match (self, other) {
+            (&Token::Operator(Op::Any), &Token::Operator(ref y)) => true,
             (&Token::Operator(ref x), &Token::Operator(ref y)) => x == y,
             _ => discriminant(self) == discriminant(other),
         }
@@ -139,8 +142,16 @@ impl Parser {
             //if !ch.is_alphanumeric() {
             self.pos += 1;
             self.ans = match ch {
-                '+' => Token::Operator(Op::Add),
-                '-' => Token::Operator(Op::Sub),
+                '+' => match self.ans.clone() {
+                    Token::Number(_) => Token::Operator(Op::Add),
+                    Token::Var(_) => Token::Operator(Op::Add),
+                    _ => Token::Operator(Op::Pos),
+                },
+                '-' => match self.ans.clone() {
+                    Token::Number(_) => Token::Operator(Op::Sub),
+                    Token::Var(_) => Token::Operator(Op::Sub),
+                    _ => Token::Operator(Op::Neg),
+                },
                 '*' => Token::Operator(Op::Mul),
                 '/' => Token::Operator(Op::Div),
                 '^' => Token::Operator(Op::Pow),
@@ -179,6 +190,20 @@ impl Parser {
                 Token::Operator(Op::Pow) => {
                     self.eat(Token::Operator(Op::Pow), input);
                     t = self.pow_factor(input);
+                }
+                Token::Operator(Op::Pos) => {
+                    self.eat(Token::Operator(Op::Pos), input);
+                    t = match self.factor(input) {
+                        Token::Number(n) => Token::Number(n),
+                        _ => t,
+                    }
+                }
+                Token::Operator(Op::Neg) => {
+                    self.eat(Token::Operator(Op::Neg), input);
+                    t = match self.factor(input) {
+                        Token::Number(n) => Token::Number(-n),
+                        _ => t,
+                    }
                 }
                 _ => return Token::None,
             };
