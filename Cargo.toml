@@ -7,6 +7,8 @@ authors = ["Raghav Shankar <warpspeedscp@gmail.com>"]
 termion = "*"
 scribe = "*"
 fst = "*"
+num = "*"
+lazy_static = "*"
 
 [features]
 debug = []

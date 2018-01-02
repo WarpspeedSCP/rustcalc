@@ -1,3 +1,4 @@
+extern crate num;
 extern crate std;
 
 use ast::Node;
@@ -44,12 +45,26 @@ impl PartialEq for Op {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
+enum ValType {
+    Bool(bool),
+    Number(f64),
+}
+
+#[derive(Clone, Debug)]
+#[repr(C)]
+struct Variable {
+    name: String,
+    val: ValType,
+}
+
+#[derive(Clone, Debug)]
 pub enum Token {
-    Number(f32),
+    Number(f64),
     Operator(Op),
-    UnaryFn(fn(f32) -> f32),
-    BinaryFn(fn(f32, f32) -> f32),
-    Var(String),
+    UnaryFn(fn(f64) -> f64),
+    BinaryFn(fn(f64, f64) -> f64),
+    Var(Variable),
     Other(char),
     None,
 }
@@ -68,7 +83,7 @@ impl PartialEq for Token {
 pub struct Parser {
     pos: usize,
     base: u32,
-    ans: Token,
+    curr: Token,
     AST: Node,
 }
 
@@ -76,7 +91,7 @@ impl Parser {
     pub fn new() -> Parser {
         Parser {
             base: 10,
-            ans: Token::None,
+            curr: Token::None,
             pos: 0,
             AST: Node::new(),
         }
@@ -88,20 +103,21 @@ impl Parser {
 
     fn reset(&mut self) {
         self.pos = 0;
-        self.ans = Token::None;
+        self.curr = Token::None;
     }
 
-    pub fn eval(&mut self, input: &[u8]) -> f32 {
+    fn peek(&mut self, input: &[u8]) -> char {
+        input[self.pos + 1] as char
+    }
+
+    pub fn eval(&mut self, input: &[u8]) -> Node {
         self.reset();
         self.get_next(input);
 
-        match self.expr(input) {
-            Token::Number(x) => x,
-            _ => std::f32::NAN,
-        }
+        self.expr(input)
     }
 
-    fn get_number(&mut self, input: &[u8]) -> f32 {
+    pub fn get_number(&mut self, input: &[u8]) -> f64 {
         let mut num: String = "".into();
 
         while self.pos < input.len()
@@ -119,8 +135,8 @@ impl Parser {
 
     fn get_next(&mut self, input: &[u8]) -> Token {
         if !(self.pos < input.len()) {
-            self.ans = Token::None;
-            return self.ans.clone();
+            self.curr = Token::None;
+            return self.curr.clone();
         }
 
         let mut ch = input[self.pos] as char;
@@ -137,17 +153,17 @@ impl Parser {
         }
 
         if ch.is_digit(self.base) || ch == '.' {
-            self.ans = Token::Number(self.get_number(input))
+            self.curr = Token::Number(self.get_number(input))
         } else {
             //if !ch.is_alphanumeric() {
             self.pos += 1;
-            self.ans = match ch {
-                '+' => match self.ans.clone() {
+            self.curr = match ch {
+                '+' => match self.curr.clone() {
                     Token::Number(_) => Token::Operator(Op::Add),
                     Token::Var(_) => Token::Operator(Op::Add),
                     _ => Token::Operator(Op::Pos),
                 },
-                '-' => match self.ans.clone() {
+                '-' => match self.curr.clone() {
                     Token::Number(_) => Token::Operator(Op::Sub),
                     Token::Var(_) => Token::Operator(Op::Sub),
                     _ => Token::Operator(Op::Neg),
@@ -158,30 +174,41 @@ impl Parser {
                 '%' => Token::Operator(Op::Mod),
                 '(' => Token::Operator(Op::LParens),
                 ')' => Token::Operator(Op::RParens),
+                '=' => if self.peek(input) == ' ' {
+                    Token::Operator(Op::Eq_)
+                } else {
+                    Token::Operator(Op::Assign)
+                },
                 _ => Token::Other(ch),
             };
         }
 
-        self.ans.clone()
+        self.curr.clone()
     }
 
     fn eat(&mut self, token: Token, input: &[u8]) {
-        if self.ans == token {
-            self.ans = self.get_next(input);
+        if self.curr == token {
+            self.curr = self.get_next(input);
         } else {
             panic!(
                 "Parse error! Expected {:?}, got {:?} at position {}!",
-                token, self.ans, self.pos
+                token, self.curr, self.pos
             );
         }
     }
 
-    fn factor(&mut self, input: &[u8]) -> Token {
-        let mut t = self.ans.clone();
-        if t == Token::Number(0.00) {
-            self.eat(Token::Number(0.0), input);
+    fn number(&mut self, input: &[u8]) -> Node {
+        self.eat(Token::Number(0.0), input);
+        Node::make_node(self.curr.clone())
+    }
+
+    fn factor(&mut self, input: &[u8]) -> Node {
+        let mut t = Node::make_node(self.curr.clone());
+
+        if *t.get_val() == Token::Number(0.00) {
+            self.number(input);
         } else {
-            match t {
+            match *t.get_val() {
                 Token::Operator(Op::LParens) => {
                     self.eat(Token::Operator(Op::LParens), input);
                     t = self.expr(input);
@@ -193,82 +220,57 @@ impl Parser {
                 }
                 Token::Operator(Op::Pos) => {
                     self.eat(Token::Operator(Op::Pos), input);
-                    t = match self.factor(input) {
-                        Token::Number(n) => Token::Number(n),
-                        _ => t,
-                    }
+                    t = Node::new().val(t.get_val()).right(&self.factor(input));
                 }
                 Token::Operator(Op::Neg) => {
                     self.eat(Token::Operator(Op::Neg), input);
-                    t = match self.factor(input) {
-                        Token::Number(n) => Token::Number(-n),
-                        _ => t,
-                    }
+                    t = Node::new().val(t.get_val()).right(&self.factor(input));
                 }
-                _ => return Token::None,
+                _ => t = t.val(&Token::None),
             };
         }
         t
     }
 
-    fn pow_factor(&mut self, input: &[u8]) -> Token {
+    fn pow_factor(&mut self, input: &[u8]) -> Node {
         let mut res = self.factor(input);
 
-        while match self.ans {
+        while match self.curr {
             Token::Operator(Op::Pow) => true,
             _ => false,
         } {
-            res = match (res, self.factor(input)) {
-                (Token::Number(x), Token::Number(y)) => Token::Number(x.powi(y as i32)),
-                _ => Token::None,
-            }
+            let ser = res.clone();
+            res = res.left(&ser)
+                .val(&self.curr.clone())
+                .right(&self.factor(input));
         }
 
         res
     }
 
-    fn term(&mut self, input: &[u8]) -> Token {
+    fn term(&mut self, input: &[u8]) -> Node {
         let mut res = self.pow_factor(input);
         let mut tok = Token::None;
 
-        while match self.ans {
+        while match self.curr {
             Token::Operator(Op::Mul) => true,
             Token::Operator(Op::Div) => true,
             Token::Operator(Op::Mod) => true,
             _ => false,
         } {
-            tok = self.ans.clone();
+            tok = self.curr.clone();
+
             match tok {
                 Token::Operator(Op::Mul) => {
                     self.eat(Token::Operator(Op::Mul), input);
-                    res = match (res, self.pow_factor(input)) {
-                        (Token::Number(x), Token::Number(y)) => Token::Number(x * y),
-                        _ => panic!("Unable to multiply at position {}", self.pos),
-                    }
                 }
 
                 Token::Operator(Op::Div) => {
                     self.eat(Token::Operator(Op::Div), input);
-                    res = match (res, self.pow_factor(input)) {
-                        (Token::Number(x), Token::Number(y)) => if y != 0.0 {
-                            Token::Number(x / y)
-                        } else {
-                            panic!("Divide by zero at {}!", self.pos)
-                        },
-                        _ => panic!("Unable to divide at position {}", self.pos),
-                    }
                 }
 
                 Token::Operator(Op::Mod) => {
                     self.eat(Token::Operator(Op::Mod), input);
-                    res = match (res, self.pow_factor(input)) {
-                        (Token::Number(x), Token::Number(y)) => if y != 0.0 {
-                            Token::Number(x % y)
-                        } else {
-                            panic!("Divide by zero at {}!", self.pos)
-                        },
-                        _ => panic!("Unable to find modulo at position {}", self.pos),
-                    }
                 }
 
                 _ => panic!(
@@ -278,37 +280,31 @@ impl Parser {
                     self.pos
                 ),
             }
+
+            let ser = res.clone();
+            res = res.left(&ser).val(&tok).right(&self.pow_factor(input));
         }
 
         res
     }
 
-    fn expr(&mut self, input: &[u8]) -> Token {
+    fn expr(&mut self, input: &[u8]) -> Node {
+        let mut res = self.term(input);
         let mut tok = Token::None;
 
-        let mut res = self.term(input);
-
-        while match self.ans.clone() {
+        while match self.curr.clone() {
             Token::Operator(Op::Add) => true,
             Token::Operator(Op::Sub) => true,
             _ => false,
         } {
-            tok = self.ans.clone();
+            tok = self.curr.clone();
 
-            res = match tok {
+            match tok {
                 Token::Operator(Op::Add) => {
                     self.eat(Token::Operator(Op::Add), input);
-                    match (res, self.term(input)) {
-                        (Token::Number(x), Token::Number(y)) => Token::Number(x + y),
-                        _ => Token::None,
-                    }
                 }
                 Token::Operator(Op::Sub) => {
                     self.eat(Token::Operator(Op::Sub), input);
-                    match (res, self.term(input)) {
-                        (Token::Number(x), Token::Number(y)) => Token::Number(x - y),
-                        _ => Token::None,
-                    }
                 }
                 _ => panic!(
                     "Expected {:?} but got {:?} at position {}!",
@@ -317,8 +313,15 @@ impl Parser {
                     self.pos
                 ),
             }
+
+            let ser = res.clone();
+            res = res.left(&ser).val(&tok).right(&self.term(input));
         }
 
         res
+    }
+
+    fn id(&mut self, input: &[u8]) -> Node {
+        Node::new()
     }
 }
