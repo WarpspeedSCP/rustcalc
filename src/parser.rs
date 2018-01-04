@@ -1,9 +1,23 @@
-extern crate num;
 extern crate std;
 
 use ast::Node;
 
+use lazy_static::LazyStatic;
+
 use std::mem::discriminant;
+
+lazy_static!{
+    pub static ref BLOCK_START: Variable = Variable{ name: "{".to_owned(), val: ValType::KeyWord };
+    pub static ref BLOCK_END: Variable = Variable{ name: "}".to_owned(), val: ValType::KeyWord };
+
+    pub static ref STATEMENT_END: Variable = Variable{ name: ";".to_owned(), val: ValType::KeyWord };
+
+    pub static ref IF_START: Variable = Variable{ name: "if".to_owned(), val: ValType::KeyWord };
+    pub static ref ELSE_START: Variable = Variable{ name: "else".to_owned(), val: ValType::KeyWord };
+    pub static ref ELSE_IF_START: Variable = Variable{ name: "elif".to_owned(), val: ValType::KeyWord };
+    pub static ref IF_END: Variable = Variable{ name: "endif".to_owned(), val: ValType::KeyWord };
+
+}
 
 #[derive(Clone, Debug, Eq)]
 pub enum Op {
@@ -46,16 +60,31 @@ impl PartialEq for Op {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-enum ValType {
+pub enum ValType {
     Bool(bool),
     Number(f64),
+    KeyWord,
+    Void,
 }
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-struct Variable {
-    name: String,
-    val: ValType,
+pub struct Variable {
+    pub name: String,
+    pub val: ValType,
+}
+
+impl Variable {
+    pub fn new(n: &str) -> Variable {
+        Variable {
+            name: n.to_owned(),
+            val: ValType::Void,
+        }
+    }
+
+    pub fn name_eq(&self, other: &Variable) -> bool {
+        (discriminant(self) == discriminant(other) && self.name == other.name)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -84,7 +113,6 @@ pub struct Parser {
     pos: usize,
     base: u32,
     curr: Token,
-    AST: Node,
 }
 
 impl Parser {
@@ -93,7 +121,6 @@ impl Parser {
             base: 10,
             curr: Token::None,
             pos: 0,
-            AST: Node::new(),
         }
     }
 
@@ -117,7 +144,7 @@ impl Parser {
         self.expr(input)
     }
 
-    pub fn get_number(&mut self, input: &[u8]) -> f64 {
+    fn get_number(&mut self, input: &[u8]) -> f64 {
         let mut num: String = "".into();
 
         while self.pos < input.len()
@@ -133,7 +160,19 @@ impl Parser {
         }
     }
 
-    fn get_next(&mut self, input: &[u8]) -> Token {
+    fn get_var(&mut self, input: &[u8]) -> Variable {
+        let mut n = String::new();
+        while self.pos < input.len()
+            && ((input[self.pos] as char).is_alphanumeric() || input[self.pos] as char == '_')
+        {
+            n.push(input[self.pos] as char);
+            self.pos += 1;
+        }
+
+        Variable::new(n.as_str())
+    }
+
+    pub fn get_next(&mut self, input: &[u8]) -> Token {
         if !(self.pos < input.len()) {
             self.curr = Token::None;
             return self.curr.clone();
@@ -146,16 +185,17 @@ impl Parser {
                 if self.pos < (input.len() - 1) {
                     self.pos += 1;
                 } else {
-                    return Token::Other(ch);
+                    panic!("Reached end of input!");
                 }
                 ch = input[self.pos] as char;
             }
         }
 
         if ch.is_digit(self.base) || ch == '.' {
-            self.curr = Token::Number(self.get_number(input))
+            self.curr = Token::Number(self.get_number(input));
+        } else if ch == '_' || ch.is_alphabetic() {
+            self.curr = Token::Var(self.get_var(input));
         } else {
-            //if !ch.is_alphanumeric() {
             self.pos += 1;
             self.curr = match ch {
                 '+' => match self.curr.clone() {
@@ -174,12 +214,31 @@ impl Parser {
                 '%' => Token::Operator(Op::Mod),
                 '(' => Token::Operator(Op::LParens),
                 ')' => Token::Operator(Op::RParens),
-                '=' => if self.peek(input) == ' ' {
-                    Token::Operator(Op::Eq_)
-                } else {
-                    Token::Operator(Op::Assign)
-                },
-                _ => Token::Other(ch),
+                '=' => {
+                    let pk = self.peek(input);
+                    if pk == '=' {
+                        Token::Operator(Op::Eq_)
+                    } else {
+                        Token::Operator(Op::Assign)
+                    }
+                }
+                '>' => {
+                    let pk = self.peek(input);
+                    if pk == '=' {
+                        Token::Operator(Op::Geq)
+                    } else {
+                        Token::Operator(Op::Gt_)
+                    }
+                }
+                '<' => {
+                    let pk = self.peek(input);
+                    if pk == '=' {
+                        Token::Operator(Op::Leq)
+                    } else {
+                        Token::Operator(Op::Lt_)
+                    }
+                }
+                _ => Token::None,
             };
         }
 
@@ -188,6 +247,7 @@ impl Parser {
 
     fn eat(&mut self, token: Token, input: &[u8]) {
         if self.curr == token {
+            println!("Eat: {:?}", self.curr);
             self.curr = self.get_next(input);
         } else {
             panic!(
@@ -198,37 +258,36 @@ impl Parser {
     }
 
     fn number(&mut self, input: &[u8]) -> Node {
-        self.eat(Token::Number(0.0), input);
-        Node::make_node(self.curr.clone())
+        let m = Node::make_node(self.curr.clone());
+        self.eat(Token::Number(0.), input);
+        m
     }
 
     fn factor(&mut self, input: &[u8]) -> Node {
         let mut t = Node::make_node(self.curr.clone());
 
-        if *t.get_val() == Token::Number(0.00) {
-            self.number(input);
-        } else {
-            match *t.get_val() {
-                Token::Operator(Op::LParens) => {
-                    self.eat(Token::Operator(Op::LParens), input);
-                    t = self.expr(input);
-                    self.eat(Token::Operator(Op::RParens), input);
-                }
-                Token::Operator(Op::Pow) => {
-                    self.eat(Token::Operator(Op::Pow), input);
-                    t = self.pow_factor(input);
-                }
-                Token::Operator(Op::Pos) => {
-                    self.eat(Token::Operator(Op::Pos), input);
-                    t = Node::new().val(t.get_val()).right(&self.factor(input));
-                }
-                Token::Operator(Op::Neg) => {
-                    self.eat(Token::Operator(Op::Neg), input);
-                    t = Node::new().val(t.get_val()).right(&self.factor(input));
-                }
-                _ => t = t.val(&Token::None),
-            };
-        }
+        match *t.get_val() {
+            Token::Number(_) => t = self.number(input),
+            Token::Var(_) => t = self.id(input),
+            Token::Operator(Op::LParens) => {
+                self.eat(Token::Operator(Op::LParens), input);
+                t = self.expr(input);
+                self.eat(Token::Operator(Op::RParens), input);
+            }
+            Token::Operator(Op::Pow) => {
+                self.eat(Token::Operator(Op::Pow), input);
+                t = self.pow_factor(input);
+            }
+            Token::Operator(Op::Pos) => {
+                self.eat(Token::Operator(Op::Pos), input);
+                t = Node::new().val(t.get_val()).right(&self.factor(input));
+            }
+            Token::Operator(Op::Neg) => {
+                self.eat(Token::Operator(Op::Neg), input);
+                t = Node::new().val(t.get_val()).right(&self.factor(input));
+            }
+            _ => t = t.val(&Token::None),
+        };
         t
     }
 
@@ -322,6 +381,8 @@ impl Parser {
     }
 
     fn id(&mut self, input: &[u8]) -> Node {
-        Node::new()
+        let m = Node::new().val(&self.curr);
+        self.eat(m.get_val().clone(), input);
+        m
     }
 }
