@@ -13,6 +13,7 @@ pub enum Op {
     Sub,
     Mul,
     Div,
+    IntDiv,
     Mod,
     Pow,
     Pos,
@@ -34,18 +35,6 @@ pub enum Op {
     LRS,
     ARS,
     Assign,
-    As_Add,
-    As_Sub,
-    As_Mul,
-    As_Div,
-    As_Mod,
-    As_Pow,
-    As_Pos,
-    As_Neg,
-    As_BitAnd,
-    As_BitOr,
-    As_BitNot,
-    As_BitXor,
     Comma,
     LParens,
     RParens,
@@ -294,54 +283,33 @@ impl Parser {
             self.curr = match ch {
                 '+' => match self.curr.clone() {
                     Token::Number(_) | Token::Var(_) => {
-                        if self.peek(input) == '=' {
-                            self.pos += 1;
-                            Token::Operator(Op::As_Add)
-                        } else {
-                            Token::Operator(Op::Add)
-                        }
+                        Token::Operator(Op::Add)
                     }
                     _ => Token::Operator(Op::Pos),
                 },
                 '-' => match self.curr.clone() {
                     Token::Number(_) | Token::Var(_) => {
-                        if self.peek(input) == '=' {
-                            self.pos += 1;
-                            Token::Operator(Op::As_Sub)
-                        } else {
-                            Token::Operator(Op::Sub)
-                        }
+                        Token::Operator(Op::Sub)
                     }
                     _ => Token::Operator(Op::Neg),
                 },
-                '*' => if self.peek(input) == '=' {
-                    self.pos += 1;
-                    Token::Operator(Op::As_Mul)
-                } else if self.peek(input) == '*' {
+                '*' => if self.peek(input) == '*' {
                     self.pos += 1;
                     Token::Operator(Op::Pow)
                 } else {
                     Token::Operator(Op::Mul)
                 },
-                '/' => if self.peek(input) == '=' {
+                '/' => if self.peek(input) == '/' {
                     self.pos += 1;
-                    Token::Operator(Op::As_Div)
+                    Token::Operator(Op::IntDiv)
                 } else {
                     self.pos += 1;
                     Token::Operator(Op::Div)
                 },
-                '^' => if self.peek(input) == '=' {
-                    self.pos += 1;
-                    Token::Operator(Op::As_BitXor)
-                } else {
-                    Token::Operator(Op::BitXor)
-                },
+                '^' => Token::Operator(Op::BitXor),
                 '&' => if self.peek(input) == '&' {
                     self.pos += 1;
                     Token::Operator(Op::And)
-                } else if self.peek(input) == '=' {
-                    self.pos += 1;
-                    Token::Operator(Op::As_BitAnd)
                 } else {
                     Token::Operator(Op::BitAnd)
                 },
@@ -349,18 +317,11 @@ impl Parser {
                 '|' => if self.peek(input) == '|' {
                     self.pos += 1;
                     Token::Operator(Op::Or_)
-                } else if self.peek(input) == '=' {
-                    self.pos += 1;
-                    Token::Operator(Op::As_BitOr)
                 } else {
                     Token::Operator(Op::BitOr)
                 },
 
-                '%' => if self.peek(input) == '=' {
-                    Token::Operator(Op::As_Mod)
-                } else {
-                    Token::Operator(Op::Mod)
-                },
+                '%' => Token::Operator(Op::Mod),
                 '(' => Token::Operator(Op::LParens),
                 ')' => Token::Operator(Op::RParens),
                 '=' => if self.peek(input) == '=' {
