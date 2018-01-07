@@ -1,30 +1,28 @@
+extern crate std;
+
 use parser::Token;
+use parser::ValType;
 use parser::Op;
+
+pub type SymTable = std::collections::HashMap<String, ValType>;
 
 #[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Node {
-    left: Option<Box<Node>>,
+    children: Vec<Node>,
     val: Token,
-    right: Option<Box<Node>>,
 }
 
 impl Node {
     pub fn new() -> Node {
         Node {
-            left: None,
-            right: None,
+            children: Vec::new(),
             val: Token::None,
         }
     }
 
-    pub fn left(mut self, l: &Node) -> Node {
-        self.left = Some(Box::new(l.clone()));
-        self
-    }
-
-    pub fn right(mut self, r: &Node) -> Node {
-        self.right = Some(Box::new(r.clone()));
+    pub fn add_child(mut self, n: &Node) -> Node {
+        self.children.push(n.clone());
         self
     }
 
@@ -37,78 +35,107 @@ impl Node {
         &self.val
     }
 
-    pub fn make_node(v: Token) -> Node {
+    pub fn make_node(v: &Token) -> Node {
         Node {
-            left: None,
-            val: v,
-            right: None,
+            children: Vec::new(),
+            val: v.clone(),
         }
     }
 
     pub fn po_(n: &Node) {
-        match &n.left {
-            &Some(ref t) => Node::po_(&t),
-            &None => {}
-        }
-
-        match &n.right {
-            &Some(ref t) => Node::po_(&t),
-            &None => {}
+        for i in &n.children {
+            Node::po_(i);
         }
 
         println!("{:?}", &n.val);
     }
 
-    pub fn eval(&self) -> f64 {
+    pub fn expr_eval(&self, sym_table: &mut SymTable) -> ValType {
         match &self.val {
-            &Token::Operator(Op::Add) => match (&self.left, &self.right) {
-                (&Some(ref x), &Some(ref y)) => x.eval() + y.eval(),
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
+            &Token::Operator(Op::Add) => match (&self.children[0], &self.children[1]) {
+                (ref x, ref y) => x.expr_eval(sym_table) + y.expr_eval(sym_table),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
             },
-            &Token::Operator(Op::Sub) => match (&self.left, &self.right) {
-                (&Some(ref x), &Some(ref y)) => x.eval() - y.eval(),
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
+            &Token::Operator(Op::Sub) => match (&self.children[0], &self.children[1]) {
+                (ref x, ref y) => x.expr_eval(sym_table) - y.expr_eval(sym_table),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
             },
-            &Token::Operator(Op::Mul) => match (&self.left, &self.right) {
-                (&Some(ref x), &Some(ref y)) => x.eval() * y.eval(),
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
+            &Token::Operator(Op::Mul) => match (&self.children[0], &self.children[1]) {
+                (ref x, ref y) => x.expr_eval(sym_table) * y.expr_eval(sym_table),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
             },
-            &Token::Operator(Op::Div) => match (&self.left, &self.right) {
-                (&Some(ref x), &Some(ref y)) => {
-                    let d = y.eval();
-                    if d != 0.0 {
-                        x.eval() / d
-                    } else {
-                        panic!("Divide by zero at {:?}\n", self);
-                    }
+            &Token::Operator(Op::Div) => match (&self.children[0], &self.children[1]) {
+                (ref x, ref y) => x.expr_eval(sym_table) / y.expr_eval(sym_table),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
+            },
+            &Token::Operator(Op::Mod) => match (&self.children[0], &self.children[1]) {
+                (ref x, ref y) => x.expr_eval(sym_table) % y.expr_eval(sym_table),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
+            },
+            &Token::Operator(Op::Pow) => match (&self.children[0], &self.children[1]) {
+                (ref x, ref y) => ValType::Number(
+                    f64::from(x.expr_eval(sym_table))
+                        .powi(f64::from(y.expr_eval(sym_table)) as i32),
+                ),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
+            },
+            &Token::Operator(Op::Pos) => match &self.children[0] {
+                ref y => y.expr_eval(sym_table),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
+            },
+            &Token::Operator(Op::Neg) => match &self.children[0] {
+                ref y => y.expr_eval(sym_table) * ValType::Number(-1.),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
+            },
+            &Token::Number(x) => ValType::Number(x),
+            &Token::Var(ref x) => {
+                if sym_table.contains_key(x) {
+                    sym_table[x].clone()
+                } else {
+                    panic!("There is no instance of the variable {} in scope!", x);
                 }
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
+            }
+
+            &Token::Operator(Op::Eq_) => match (&self.children[0], &self.children[1]) {
+                (ref x, ref y) => ValType::Bool(x.expr_eval(sym_table) == y.expr_eval(sym_table)),
+                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
             },
-            &Token::Operator(Op::Mod) => match (&self.left, &self.right) {
-                (&Some(ref x), &Some(ref y)) => {
-                    let d = y.eval() as i64;
-                    if d != 0 {
-                        ((x.eval() as i64) % d) as f64
-                    } else {
-                        panic!("Divide by zero at {:?}\n", self);
-                    }
-                }
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
+            _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
+        }
+    }
+
+    pub fn module_eval(&mut self, sym_table: &mut SymTable) {
+        self.children[0].compound_eval(sym_table)
+    }
+
+    fn compound_eval(&mut self, sym_table: &mut SymTable) {
+        for i in &mut self.children {
+            i.statement_eval(sym_table);
+        }
+    }
+
+    pub fn statement_eval(&mut self, sym_table: &mut SymTable) -> ValType {
+        match self.val {
+            Token::Operator(Op::Assign) => self.assign_statement_eval(sym_table),
+            _ => self.expr_eval(sym_table),
+        }
+    }
+
+    fn assign_statement_eval(&mut self, sym_table: &mut SymTable) -> ValType {
+        let m = self.children[0].val.clone();
+        let res = self.children[1].expr_eval(sym_table);
+        match &m {
+            &Token::Var(ref x) => if sym_table.contains_key(x) {
+                sym_table.remove(x);
+                sym_table.insert(x.clone(), res.clone());
+                self.children[0].val = Token::Var(x.clone());
+                return sym_table[x].clone();
+            } else {
+                sym_table.insert(x.clone(), res.clone());
+                self.children[0].val = Token::Var(x.clone());
+                return sym_table[x].clone();
             },
-            &Token::Operator(Op::Pow) => match (&self.left, &self.right) {
-                (&Some(ref x), &Some(ref y)) => x.eval().powi(y.eval() as i32),
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Pos) => match &self.right {
-                &Some(ref y) => y.eval(),
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Neg) => match &self.right {
-                &Some(ref y) => y.eval() * -1.,
-                _ => panic!("Eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Number(x) => x,
-            _ => panic!("Eval error!\n Tree structure- {:?}", self),
+            _ => panic!("This shouldn't happen."),
         }
     }
 }
