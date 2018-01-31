@@ -9,7 +9,7 @@ use termion::input::TermRead;
 use termion::event::Key;
 use termion::cursor::Goto;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::io::{Stdin, Stdout, Write};
 
 pub struct Point {
@@ -23,23 +23,84 @@ impl Point {
     }
 }
 
+#[derive(Clone, Debug)]
 struct Trie {
-    val: String,
-    children: std::collections::HashMap<char, Trie>,
+    val: Option<String>,
+    children: BTreeMap<char, Trie>,
+    end: bool,
 }
 
 impl Trie {
     pub fn new() -> Trie {
         Trie {
-            val: String::new(),
-            children: HashMap::new(),
+            val: None,
+            children: BTreeMap::new(),
+            end: false,
+        }
+    }
+
+    fn val(mut self, v: &String) -> Trie {
+        self.val = Some(v.clone());
+        self
+    }
+
+    pub fn complete(&self, string: &[u8]) -> Vec<String> {
+        match string.len() {
+            0 => self.descend(),
+            _ => match self.children.get(&(string[0] as char)) {
+                Some(s) => s.complete(&string[1..]),
+                None => Vec::new(),
+            },
+        }
+    }
+
+    pub fn descend(&self) -> Vec<String> {
+        let mut vd: Vec<String> = Vec::new();
+        match self.children.len() {
+            0 => match self.val.clone() {
+                Some(v) => vd.push(v),
+                None => return Vec::new(),
+            },
+            _ => for i in &self.children {
+                match self.val.clone() {
+                    Some(v) => if self.end {
+                        vd.push(v)
+                    },
+                    None => return Vec::new(),
+                }
+                vd.append(&mut i.1.descend());
+            },
+        }
+        vd
+    }
+
+    pub fn insert(mut trie: Trie, string: &String) -> Trie {
+        unsafe {
+            let mut m: *mut Trie = &mut trie as *mut Trie;
+            let d = string.as_bytes();
+            for i in 0..string.len() {
+                m = match (*m).children.get_mut(&(d[i] as char)) {
+                    Some(x) => x as *mut Trie,
+                    None => {
+                        (*m).children.insert(
+                            (d[i] as char),
+                            Trie::new().val(&String::from(string.get(..=i).unwrap())),
+                        );
+                        (*m).children.get_mut(&(d[i] as char)).unwrap()
+                    }
+                }
+            }
+
+            (*m).val = Some(string.clone());
+            (*m).end = true;
+            trie
         }
     }
 }
 
 pub struct InputManager<'a> {
     //key_comp_tree: fst::Map,
-    //user_comp_tree: ,
+    user_comp_tree: Trie, //Trie<String, String>,
     terminal: &'a mut RawTerminal<Stdout>,
     insert: bool,
     pos: Point,
@@ -48,6 +109,7 @@ pub struct InputManager<'a> {
 impl<'a> InputManager<'a> {
     pub fn new(t: &mut RawTerminal<Stdout>) -> InputManager {
         InputManager {
+            user_comp_tree: Trie::new(),
             terminal: t,
             insert: false,
             pos: Point::new(1, 1),
@@ -57,20 +119,16 @@ impl<'a> InputManager<'a> {
     pub fn put_line(&mut self, output: &String) {
         write!(
             self.terminal,
-            "{}{}{}\n",
-            termion::cursor::Goto(1, self.pos.y + 2),
+            "{}{}{}{}\n",
+            Goto(1, self.pos.y + 2),
             termion::clear::CurrentLine,
-            output
+            output,
+            Goto(1, self.pos.y)
         ).unwrap();
     }
 
     pub fn clear_all(&mut self) {
-        write!(
-            self.terminal,
-            "{}{}",
-            termion::clear::All,
-            termion::cursor::Goto(1, 1)
-        );
+        write!(self.terminal, "{}{}", termion::clear::All, Goto(1, 1));
     }
 
     pub fn get_line(
@@ -298,6 +356,15 @@ impl<'a> InputManager<'a> {
         }
 
         write!(self.terminal, "\n{}", termion::clear::CurrentLine).unwrap();
+        if out.to_string().len() > 0 {
+            for i in out.to_string()
+                .split(|x: char| x.is_whitespace() || !x.is_alphanumeric())
+            {
+                if !i.chars().all(|x: char| x.is_numeric()) {
+                    self.user_comp_tree = Trie::insert(self.user_comp_tree.clone(), &i.to_owned());
+                }
+            }
+        }
         self.terminal.flush().unwrap();
         out.to_string()
     }
@@ -350,5 +417,10 @@ impl<'a> InputManager<'a> {
         }
     }
 
-    fn handle_tab(&mut self, out: String) {}
+    fn handle_tab(&mut self, out: String) {
+        let mut x = self.user_comp_tree.complete(&out.as_bytes());
+        x.dedup();
+        let m = format!("{:?}", x,);
+        self.put_line(&m);
+    }
 }

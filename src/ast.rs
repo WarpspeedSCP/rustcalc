@@ -1,44 +1,92 @@
 extern crate std;
+extern crate termion;
+
+use lazy_static::LazyStatic;
+
+use std::fmt;
 
 use parser::Token;
-use parser::ValType;
+use parser::TokStruct;
 use parser::Op;
 
-pub type SymTable = std::collections::HashMap<String, ValType>;
+pub type SymTable = std::collections::HashMap<String, Token>;
+
+lazy_static! {
+    pub static ref KEYWORD_TABLE: SymTable = {
+        let mut m = SymTable::new();
+        m.insert("state".to_owned(), Token::KeyWord);
+        m.insert("if".to_owned(), Token::KeyWord);
+        m.insert("else".to_owned(), Token::KeyWord);
+        m.insert("elif".to_owned(), Token::KeyWord);
+        m.insert("endif".to_owned(), Token::KeyWord);
+        m.insert("return".to_owned(), Token::KeyWord);
+        m.insert("write".to_owned(), Token::KeyWord);
+        m.insert("read".to_owned(), Token::KeyWord);
+        m.insert("loop".to_owned(), Token::KeyWord);
+        m.insert("for".to_owned(), Token::KeyWord);
+        m.insert("in".to_owned(), Token::KeyWord);
+        m.insert("array".to_owned(), Token::KeyWord);
+        m
+    };
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+pub enum NodeType {
+    Function = 1,
+    Block = 2,
+    Assignment = 3,
+    AExpression = 4,
+    BExpression = 5,
+    FnCall = 6,
+    None = 7,
+}
 
 #[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Node {
     children: Vec<Node>,
-    val: Token,
+    val: TokStruct,
+    n_type: NodeType,
 }
 
 impl Node {
     pub fn new() -> Node {
         Node {
             children: Vec::new(),
-            val: Token::None,
+            val: TokStruct::new(Token::None, 0),
+            n_type: NodeType::None,
         }
     }
 
-    pub fn add_child(mut self, n: &Node) -> Node {
-        self.children.push(n.clone());
-        self
+    pub fn add_child(&mut self, n: Node) -> Node {
+        self.children.push(n);
+        self.clone()
     }
 
-    pub fn val(mut self, v: &Token) -> Node {
-        self.val = v.clone();
-        self
+    pub fn val(&mut self, v: TokStruct) -> Node {
+        self.val = v;
+        self.clone()
     }
 
-    pub fn get_val(&self) -> &Token {
-        &self.val
+    pub fn type_(&mut self, t: NodeType) -> Node {
+        self.n_type = t.clone();
+        self.clone()
     }
 
-    pub fn make_node(v: &Token) -> Node {
+    pub fn get_val(&self) -> Token {
+        self.val.get_val()
+    }
+
+    pub fn get_pos(&self) -> usize {
+        self.val.get_pos()
+    }
+
+    pub fn make_node(v: TokStruct) -> Node {
         Node {
             children: Vec::new(),
-            val: v.clone(),
+            val: v,
+            n_type: NodeType::None,
         }
     }
 
@@ -47,95 +95,6 @@ impl Node {
             Node::po_(i);
         }
 
-        println!("{:?}", &n.val);
-    }
-
-    pub fn expr_eval(&self, sym_table: &mut SymTable) -> ValType {
-        match &self.val {
-            &Token::Operator(Op::Add) => match (&self.children[0], &self.children[1]) {
-                (ref x, ref y) => x.expr_eval(sym_table) + y.expr_eval(sym_table),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Sub) => match (&self.children[0], &self.children[1]) {
-                (ref x, ref y) => x.expr_eval(sym_table) - y.expr_eval(sym_table),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Mul) => match (&self.children[0], &self.children[1]) {
-                (ref x, ref y) => x.expr_eval(sym_table) * y.expr_eval(sym_table),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Div) => match (&self.children[0], &self.children[1]) {
-                (ref x, ref y) => x.expr_eval(sym_table) / y.expr_eval(sym_table),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Mod) => match (&self.children[0], &self.children[1]) {
-                (ref x, ref y) => x.expr_eval(sym_table) % y.expr_eval(sym_table),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Pow) => match (&self.children[0], &self.children[1]) {
-                (ref x, ref y) => ValType::Number(
-                    f64::from(x.expr_eval(sym_table))
-                        .powi(f64::from(y.expr_eval(sym_table)) as i32),
-                ),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Pos) => match &self.children[0] {
-                ref y => y.expr_eval(sym_table),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Operator(Op::Neg) => match &self.children[0] {
-                ref y => y.expr_eval(sym_table) * ValType::Number(-1.),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            &Token::Number(x) => ValType::Number(x),
-            &Token::Var(ref x) => {
-                if sym_table.contains_key(x) {
-                    sym_table[x].clone()
-                } else {
-                    panic!("There is no instance of the variable {} in scope!", x);
-                }
-            }
-
-            &Token::Operator(Op::Eq_) => match (&self.children[0], &self.children[1]) {
-                (ref x, ref y) => ValType::Bool(x.expr_eval(sym_table) == y.expr_eval(sym_table)),
-                _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-            },
-            _ => panic!("expr_eval error!\n Tree structure- {:?}", self),
-        }
-    }
-
-    pub fn module_eval(&mut self, sym_table: &mut SymTable) {
-        self.children[0].compound_eval(sym_table)
-    }
-
-    fn compound_eval(&mut self, sym_table: &mut SymTable) {
-        for i in &mut self.children {
-            i.statement_eval(sym_table);
-        }
-    }
-
-    pub fn statement_eval(&mut self, sym_table: &mut SymTable) -> ValType {
-        match self.val {
-            Token::Operator(Op::Assign) => self.assign_statement_eval(sym_table),
-            _ => self.expr_eval(sym_table),
-        }
-    }
-
-    fn assign_statement_eval(&mut self, sym_table: &mut SymTable) -> ValType {
-        let m = self.children[0].val.clone();
-        let res = self.children[1].expr_eval(sym_table);
-        match &m {
-            &Token::Var(ref x) => if sym_table.contains_key(x) {
-                sym_table.remove(x);
-                sym_table.insert(x.clone(), res.clone());
-                self.children[0].val = Token::Var(x.clone());
-                return sym_table[x].clone();
-            } else {
-                sym_table.insert(x.clone(), res.clone());
-                self.children[0].val = Token::Var(x.clone());
-                return sym_table[x].clone();
-            },
-            _ => panic!("This shouldn't happen."),
-        }
+        println!("{:?} : {:?}", n.val, n.n_type);
     }
 }
