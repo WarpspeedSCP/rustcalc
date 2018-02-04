@@ -318,7 +318,7 @@ impl Lexer {
                 if self.pos < (self.input.len() - 1) {
                     self.pos += 1;
                 } else {
-                    panic!("Reached end of input!");
+                    return TokStruct::new(Token::None, 0);
                 }
                 ch = self.input[self.pos] as char;
             }

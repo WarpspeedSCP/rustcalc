@@ -8,8 +8,6 @@ mod io;
 mod parser;
 mod ast;
 
-use termion::raw::IntoRawMode;
-
 use std::io::Write;
 
 use io::InputManager;
@@ -27,23 +25,18 @@ fn main() {
     //*
     {
         let mut input = std::io::stdin();
-        let mut terminal = std::io::stdout().into_raw_mode().unwrap();
         let mut p: io::Point = io::Point::new(1, 1);
-        let mut im = InputManager::new(&mut terminal);
+        let mut im = InputManager::new();
 
         im.clear_all();
 
         while a != String::from("exit") {
-            a = im.get_line(&"prompt:>".to_owned(), &mut input, &mut history);
+            a = im.get_line(&"prompt:>".to_owned(), &mut input);
 
             parser.input(a.clone());
 
             if a != "exit".to_owned() {
                 d = parser.eval();
-            }
-
-            if history.len() > 0 {
-                history.retain(|t| *t != "".to_owned());
             }
         }
 
