@@ -74,9 +74,7 @@ pub enum Op {
     RParens,
     BlockStart,
     BlockEnd,
-    VarDecl,
     LineEnd,
-    ModEnd,
     Any,
 }
 
