@@ -43,6 +43,7 @@ fn main() {
         im.put_line(&"\r\n".to_owned());
     }
 
+    println!("{:?}", d.get_children());
     Node::po_(&d);
 
     /*

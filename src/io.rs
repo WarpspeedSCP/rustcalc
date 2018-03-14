@@ -87,7 +87,7 @@ impl Trie {
         // I am using raw pointers to traverse the trie because
         // it seems to be the only sane way of doing so;
         // I couldn't think of a way to do this with mutable references,
-        // and since it hasn't ever crashed since I wrote it, I'm assuming it's safe.
+        // and since it hasn't ever paniced since I wrote it, I'm assuming it's safe.
         //
         // Feel free to replace this with a safer/rustier implementation if you can.
         unsafe {
@@ -290,7 +290,7 @@ impl InputManager {
                 // Alt doesn't do anything yet.
                 Key::Alt(c) => self.handle_alt(c),
 
-                // Ctrl + 'c' can be used to gracefully exit the app in a suitable way.
+                // Ctrl + 'c' can be used to gracefully exit the app.
                 Key::Ctrl(c) => {
                     if c == 'c' {
                         return String::from("exit");
@@ -465,8 +465,7 @@ impl InputManager {
                         // TODO: Find out why this exists.
 /*                         if self.pos.x - pl > 0 {
                             self.pos.x - pl;
-                        } */
-                    }
+                        } */                    }
                 }
 
                 // Just enable or disable insert mode.
@@ -491,7 +490,7 @@ impl InputManager {
             }
         }
         self.terminal.flush().unwrap();
-        
+
         // Make sure history buffer doesn't contain any empty or whitespace only strings.
         if self.history.len() > 0 {
             self.history.retain(|t: &String| {

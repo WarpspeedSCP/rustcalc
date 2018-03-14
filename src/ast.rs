@@ -1,34 +1,8 @@
 extern crate std;
 extern crate termion;
 
-use lazy_static::LazyStatic;
-
-use std::fmt;
-
 use parser::Token;
 use parser::TokStruct;
-use parser::Op;
-
-pub type SymTable = std::collections::HashMap<String, Token>;
-
-lazy_static! {
-    pub static ref KEYWORD_TABLE: SymTable = {
-        let mut m = SymTable::new();
-        m.insert("state".to_owned(), Token::KeyWord);
-        m.insert("if".to_owned(), Token::KeyWord);
-        m.insert("else".to_owned(), Token::KeyWord);
-        m.insert("elif".to_owned(), Token::KeyWord);
-        m.insert("endif".to_owned(), Token::KeyWord);
-        m.insert("return".to_owned(), Token::KeyWord);
-        m.insert("write".to_owned(), Token::KeyWord);
-        m.insert("read".to_owned(), Token::KeyWord);
-        m.insert("loop".to_owned(), Token::KeyWord);
-        m.insert("for".to_owned(), Token::KeyWord);
-        m.insert("in".to_owned(), Token::KeyWord);
-        m.insert("array".to_owned(), Token::KeyWord);
-        m
-    };
-}
 
 #[derive(Debug, Clone, PartialEq)]
 #[repr(C)]
@@ -40,6 +14,7 @@ pub enum NodeType {
     BExpression = 5,
     FnCall = 6,
     None = 7,
+    Cond = 8,
 }
 
 #[derive(Debug, Clone)]
@@ -69,6 +44,11 @@ impl Node {
         self.clone()
     }
 
+    pub fn children(&mut self, c: Vec<Node>) -> Node {
+        self.children = c;
+        self.clone()
+    }
+
     pub fn type_(&mut self, t: NodeType) -> Node {
         self.n_type = t.clone();
         self.clone()
@@ -76,6 +56,10 @@ impl Node {
 
     pub fn get_val(&self) -> Token {
         self.val.get_val()
+    }
+
+    pub fn get_children(&self) -> Vec<Node> {
+        self.children.clone()
     }
 
     pub fn get_pos(&self) -> usize {
