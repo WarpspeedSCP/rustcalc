@@ -26,21 +26,22 @@ fn main() {
     {
         let mut input = std::io::stdin();
         let mut p: io::Point = io::Point::new(1, 1);
-        let mut im = InputManager::new();
+        //let mut im = InputManager::new();
 
-        im.clear_all();
+        //im.clear_all();
 
         while a != String::from("exit") {
-            a = im.get_line(&"prompt:>".to_owned(), &mut input);
+            input.read_line(&mut a); //im.get_line(&"prompt:>".to_owned(), &mut input);
 
             parser.input(a.clone());
 
             if a != "exit".to_owned() {
                 d = parser.eval();
+                break;
             }
         }
 
-        im.put_line(&"\r\n".to_owned());
+        //        im.put_line(&"\r\n".to_owned());
     }
 
     println!("{:?}", d.get_children());

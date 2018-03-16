@@ -268,12 +268,20 @@ impl Lexer {
         self.pos
     }
 
+    pub fn set_pos(&mut self, pos: usize) {
+        self.pos = pos
+    }
+
     pub fn get_base(&self) -> u32 {
         self.base
     }
 
     pub fn get_curr(&self) -> TokStruct {
         self.curr.clone()
+    }
+
+    pub fn set_curr(&mut self, curr: TokStruct) {
+        self.curr = curr
     }
 
     pub fn base(&mut self, base: u32) -> &mut Lexer {
@@ -490,6 +498,7 @@ impl Lexer {
                     '\n' | ';' => Token::Operator(Op::LineEnd),
                     '{' => Token::Operator(Op::BlockStart),
                     '}' => Token::Operator(Op::BlockEnd),
+                    ',' => Token::Operator(Op::Comma),
 
                     // We don't recognise the symbol.
                     _ => panic!(
@@ -745,7 +754,7 @@ impl Parser {
                 t.children(self.statement_list()).type_(NodeType::Block);
                 self.lexer.eat(Token::Operator(Op::BlockEnd));
             }
-            Token::Var(_) => t = self.assign_function_disambiguate(),
+            Token::Var(_) => t = self.var_disambiguate(),
             Token::KeyWord(x) => if x == "if".to_owned() {
                 t.children(self.conditional_statement())
                     .type_(NodeType::Cond);
@@ -767,20 +776,31 @@ impl Parser {
         t
     }
 
-    fn assign_function_disambiguate(&mut self) -> Node {
-        let inputstr = Vec::from(self.input.clone().as_bytes());
-        for i in self.lexer.get_pos()..inputstr.len() {
-            if inputstr[i] as char == ';' || inputstr[i] as char == '\n' {
-                return self.fn_call();
-            } else if inputstr[i] as char == '=' && inputstr[i + 1] as char != '=' {
-                return self.assign_statement();
-            }
+    fn var_disambiguate(&mut self) -> Node {
+        let cc = self.get_curr();
+        let cp = self.lexer.get_pos();
+        let x: Node;
+
+        let m = self.lexer.get_next();
+
+        self.lexer.set_pos(cp);
+        self.lexer.set_curr(cc);
+        match m.get_val() {
+            Token::Operator(Op::LParens) => x = self.fn_call(),
+            Token::Operator(Op::RParens) | Token::Operator(Op::Comma) => x = self.id(),
+            Token::Operator(Op::Assign) => x = self.assign_statement(),
+            _ => x = self.id(),
         }
-        self.fn_call()
+
+        x
     }
 
     fn assign_statement(&mut self) -> Node {
-        Node::new().val(TokStruct::new(Token::Other('8'), 434))
+        Node::new()
+            .add_child(self.id())
+            .val(self.lexer.eat(Token::Operator(Op::Assign)))
+            .add_child(self.statement())
+            .type_(NodeType::Assignment)
     }
 
     fn return_statement(&mut self) {}
@@ -936,12 +956,7 @@ impl Parser {
         match m.get_val() {
             Token::Number(_) => t = self.expr().type_(NodeType::BExpression),
             Token::Var(_) => {
-                let d = self.input.as_bytes()[self.lexer.get_pos()] as char;
-                if d == '(' {
-                    t = self.fn_call().type_(NodeType::BExpression);
-                } else {
-                    t = self.expr().type_(NodeType::BExpression);
-                }
+                t = self.var_disambiguate();
             }
             Token::Bool(_) => t = self.boolean(),
             Token::Operator(Op::Not) => {
@@ -965,10 +980,33 @@ impl Parser {
     }
 
     fn fn_call(&mut self) -> Node {
-        self.lexer.eat(Token::Var("".to_owned()));
+        let mut t = Node::new()
+            .val(self.lexer.eat(Token::Var("".to_owned())))
+            .type_(NodeType::FnCall);
         self.lexer.eat(Token::Operator(Op::LParens));
+        loop {
+            match self.get_curr().get_val() {
+                Token::Operator(Op::LParens) => t.add_child(self.expr().type_(NodeType::Fn_Arg)),
+                Token::Var(_) => t.add_child(self.var_disambiguate().type_(NodeType::Fn_Arg)),
+                Token::Operator(Op::RParens) => break,
+                Token::Number(_) => t.add_child(self.number().type_(NodeType::Fn_Arg)),
+                _ => panic!(
+                    "Did not expect {} at position {} in function call args!",
+                    self.get_curr().get_val(),
+                    self.get_curr().get_pos()
+                ),
+            };
+            match self.get_curr().get_val() {
+                Token::Operator(Op::Comma) => {
+                    self.lexer.eat(Token::Operator(Op::Comma));
+                }
+                Token::Operator(Op::RParens) => break,
+                _ => panic!("herpaderp!"),
+            }
+        }
         self.lexer.eat(Token::Operator(Op::RParens));
-        Node::new().val(TokStruct::new(Token::Var("t".to_owned()), 0))
+
+        t
     }
 }
 
@@ -994,7 +1032,7 @@ impl Parser {
 
     args: (arg SEPARATOR)*
 
-    arg: VARIABLE
+    arg: expr
 
     bool_expr: bool_term (OR bool_term)*
 

@@ -7,14 +7,14 @@ use parser::TokStruct;
 #[derive(Debug, Clone, PartialEq)]
 #[repr(C)]
 pub enum NodeType {
-    Function = 1,
     Block = 2,
     Assignment = 3,
     AExpression = 4,
     BExpression = 5,
     FnCall = 6,
-    None = 7,
-    Cond = 8,
+    Fn_Arg = 7,
+    None = 8,
+    Cond = 9,
 }
 
 #[derive(Debug, Clone)]
