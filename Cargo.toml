@@ -10,7 +10,6 @@ fst = "*"
 fst-regex = "*"
 #num = "*"
 lazy_static = "*"
-radix_trie = "*"
 
 [features]
 debug = []

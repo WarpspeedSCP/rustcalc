@@ -1,7 +1,6 @@
 #![feature(inclusive_range_syntax)]
 #[macro_use]
 extern crate lazy_static;
-extern crate radix_trie;
 extern crate termion;
 
 mod io;

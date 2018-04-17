@@ -11,8 +11,8 @@ use std::mem::discriminant;
 // Operator overloads.
 use std::ops::*;
 
-use std::f64;
 use std::collections::HashMap;
+use std::f64;
 
 pub type SymTable = HashMap<String, Token>;
 
@@ -20,16 +20,9 @@ lazy_static! {
     pub static ref KEYWORD_TABLE: SymTable = {
         let mut d: SymTable = SymTable::new();
 
-        let m = ["state",
-                 "if",
-                 "else",
-                 "elif",
-                 "return",
-                 "write",
-                 "read",
-                 "for",
-                 "in",
-                 "array"];
+        let m = [
+            "state", "if", "else", "elif", "return", "write", "read", "for", "in", "array", "fn"
+        ];
 
         for i in 0..m.len() {
             d.insert(m[i].to_owned(), Token::KeyWord(m[i].to_owned()));
@@ -428,13 +421,17 @@ impl Lexer {
                     // If the previous token is a number or identifier, we know it's a binary operator.
                     // If the previous token is an operator, we can consider this token to be a unary operator.
                     '+' => match self.curr.get_val() {
-                        Token::Number(_) | Token::Var(_) => Token::Operator(Op::Add),
+                        Token::Number(_) | Token::Var(_) | Token::Operator(Op::RParens) => {
+                            Token::Operator(Op::Add)
+                        }
                         _ => Token::Operator(Op::Pos),
                     },
 
                     // Same.
                     '-' => match self.curr.get_val() {
-                        Token::Number(_) | Token::Var(_) => Token::Operator(Op::Sub),
+                        Token::Number(_) | Token::Var(_) | Token::Operator(Op::RParens) => {
+                            Token::Operator(Op::Sub)
+                        }
                         _ => Token::Operator(Op::Neg),
                     },
 
@@ -449,7 +446,6 @@ impl Lexer {
                         self.pos += 1;
                         Token::Operator(Op::IntDiv)
                     } else {
-                        self.pos += 1;
                         Token::Operator(Op::Div)
                     },
                     '^' => Token::Operator(Op::BitXor),
@@ -526,7 +522,8 @@ impl Lexer {
     }
 
     // Validates the current token against a provided value and,
-    //   on successful validation, updates the current token and returns the previous token.
+    //   on successful validation, updates the current token and
+    //   returns the previous token.
     pub fn eat(&mut self, token: Token) -> TokStruct {
         let t = self.curr.clone();
         if discriminant(&t.get_val()) == discriminant(&token) {
@@ -586,12 +583,12 @@ impl Parser {
 
     // Terminal function to accept a number.
     fn number(&mut self) -> Node {
-        Node::make_node(self.lexer.eat(Token::Number(0.)))
+        Node::make_node(self.lexer.eat(Token::Number(0.))).type_(NodeType::AExpression)
     }
 
     // Terminal function to accept an identifier.
     fn id(&mut self) -> Node {
-        Node::make_node(self.lexer.eat(Token::Var(String::default())))
+        Node::make_node(self.lexer.eat(Token::Var(String::new())))
     }
 
     // Terminal function to accept a boolean value.
@@ -608,8 +605,8 @@ impl Parser {
         let m = self.get_curr();
 
         match m.get_val() {
-            Token::Number(_) => t = self.number().type_(NodeType::AExpression),
-            Token::Var(_) => t = self.id().type_(NodeType::AExpression),
+            Token::Number(_) => t = self.number(),
+            Token::Var(_) => t = self.var_disambiguate(),
 
             // If we encounter a '(' character, We interpret it as a subexpression.
             Token::Operator(Op::LParens) => {
@@ -666,12 +663,12 @@ impl Parser {
     // The power operator is consumed by the factor() function.
     pub fn pow_factor(&mut self) -> Node {
         // The first factor is guaranteed to exist.
-        let t = self.factor().type_(NodeType::AExpression);
+        let t = self.factor();
         let m = self.get_curr();
 
         match m.get_val() {
             // If we find Op::Pow, we can continue to get the next power factor.
-            Token::Operator(Op::Pow) => Node::new().val(m).add_child(t).add_child(self.factor()),
+            Token::Operator(Op::Pow) => Node::new().val(m).add_child(t).add_child(self.factor()).type_(NodeType::AExpression),
             _ => t,
         }
     }
@@ -683,7 +680,7 @@ impl Parser {
     // term: pow_factor ((MUL | DIV | MOD | INTDIV) pow_factor)*
 
     pub fn term(&mut self) -> Node {
-        let mut t = self.pow_factor().type_(NodeType::AExpression);
+        let mut t = self.pow_factor();
         let mut m = self.get_curr();
 
         // Keep looping while the current operator is any of these.
@@ -696,7 +693,8 @@ impl Parser {
         } {
             t = Node::make_node(self.lexer.eat(m.get_val()))
                 .add_child(t)
-                .add_child(self.pow_factor());
+                .add_child(self.pow_factor())
+                .type_(NodeType::AExpression);
             m = self.get_curr();
         }
 
@@ -711,7 +709,7 @@ impl Parser {
     // expr: term ((ADD | SUB) term)*
 
     pub fn expr(&mut self) -> Node {
-        let mut t = self.term().type_(NodeType::AExpression);
+        let mut t = self.term();
         let mut m = self.get_curr();
 
         while match m.get_val() {
@@ -728,15 +726,58 @@ impl Parser {
         t
     }
 
+    fn arg_list(&mut self) -> Node {
+        self.lexer.eat(Token::Operator(Op::LParens));
+
+        let mut m = self.get_curr();
+        let mut t = Node::new();
+
+        while match m.get_val() {
+            Token::Operator(Op::RParens) => false,
+            Token::Var(_) => {
+                m = self.lexer.eat(Token::Var(String::new()));
+                true
+            }
+            Token::Operator(Op::Comma) => {
+                self.lexer.eat(Token::Operator(Op::Comma));
+                m = self.lexer.eat(Token::Var(String::new()));
+                true
+            }
+            _ => panic!(
+                "Expected Var, got {} at position {}!",
+                m.get_val(),
+                m.get_pos()
+            ),
+        } {
+            t = t.add_child(Node::make_node(m.clone()).type_(NodeType::FnArg)).type_(NodeType::FnArgs);
+            m = self.get_curr();
+        }
+
+        self.lexer.eat(Token::Operator(Op::RParens));
+
+        t
+    }
+
     fn function(&mut self) -> Node {
-        Node::new()
+        self.lexer.eat(KEYWORD_TABLE[&"fn".to_owned()].clone());
+        let mut t = Node::new()
+            .val(self.lexer.eat(Token::Var(String::new())))
+            .type_(NodeType::FnDef)
+            .add_child(self.arg_list());
+        t = t.add_child(Node::new().children(self.statement_list()).type_(NodeType::Block));
+
+        t
     }
 
     fn statement_list(&mut self) -> Vec<Node> {
+        self.lexer.eat(Token::Operator(Op::BlockStart));
         let mut t = vec![self.statement()];
 
         while match self.get_curr().get_val() {
-            Token::Operator(Op::BlockEnd) => return t,
+            Token::Operator(Op::BlockEnd) => {
+                self.lexer.eat(Token::Operator(Op::BlockEnd));
+                false
+            }
             _ => true,
         } {
             t.push(self.statement());
@@ -748,21 +789,24 @@ impl Parser {
     fn statement(&mut self) -> Node {
         let mut t = Node::new();
 
-        match self.lexer.get_curr().get_val() {
+        match self.get_curr().get_val() {
             Token::Operator(Op::BlockStart) => {
-                self.lexer.eat(Token::Operator(Op::BlockStart));
-                t.children(self.statement_list()).type_(NodeType::Block);
-                self.lexer.eat(Token::Operator(Op::BlockEnd));
+                t = t.children(self.statement_list()).type_(NodeType::Block);
             }
-            Token::Var(_) => t = self.var_disambiguate(),
+            Token::Var(_) | Token::Number(_) => t = self.expr(),
             Token::KeyWord(x) => if x == "if".to_owned() {
-                t.children(self.conditional_statement())
+                t = t.children(self.conditional_statement())
                     .type_(NodeType::Cond);
+            } else if x == "return".to_owned() {
+                t = self.return_statement();
+            } else if x == "fn".to_owned() {
+                t = self.function();
             },
             Token::Operator(Op::LParens) => t = self.expr(),
             Token::Operator(Op::LineEnd) => {
-                t = Node::new().val(self.lexer.eat(Token::Operator(Op::LineEnd)))
+                t = Node::new().val(self.lexer.eat(Token::Operator(Op::LineEnd)));
             }
+            
             Token::Operator(Op::BlockEnd) => if self.lexer.peek_back() == '{' {
                 t = Node::new().type_(NodeType::Block);
             },
@@ -776,34 +820,51 @@ impl Parser {
         t
     }
 
+    // Disambigutes the various node types which hold a Var token
     fn var_disambiguate(&mut self) -> Node {
         let cc = self.get_curr();
         let cp = self.lexer.get_pos();
-        let x: Node;
+        let t: Node;
 
+        // Get next token. This will advance the lexer forward by one token.
         let m = self.lexer.get_next();
 
+        // We need to reset thr lexer's position so it doesn't miss a token.
         self.lexer.set_pos(cp);
         self.lexer.set_curr(cc);
         match m.get_val() {
-            Token::Operator(Op::LParens) => x = self.fn_call(),
-            Token::Operator(Op::RParens) | Token::Operator(Op::Comma) => x = self.id(),
-            Token::Operator(Op::Assign) => x = self.assign_statement(),
-            _ => x = self.id(),
+            
+            // If the next token is a left parenthesis, it can only be a function call.
+            Token::Operator(Op::LParens) => t = self.fn_call(),
+            
+            // If the next token is a right parenthesis or a comma, 
+            //   the variable is probably part of an arg list.
+            // This will probably be depreciated.
+            Token::Operator(Op::RParens) | Token::Operator(Op::Comma) => t = self.id(),
+            
+            // If the next token is assign, we return an assign statement node.
+            Token::Operator(Op::Assign) => t = self.assign_statement(),
+
+            // Otherwise, it is a variable name.
+            _ => t = self.id(),
         }
 
-        x
+        t
     }
 
     fn assign_statement(&mut self) -> Node {
         Node::new()
-            .add_child(self.id())
+            .add_child(self.id().type_(NodeType::Assignment))
             .val(self.lexer.eat(Token::Operator(Op::Assign)))
-            .add_child(self.statement())
+            .add_child(self.expr())
             .type_(NodeType::Assignment)
     }
 
-    fn return_statement(&mut self) {}
+    fn return_statement(&mut self) -> Node {
+        Node::new()
+            .val(self.lexer.eat(KEYWORD_TABLE[&"return".to_owned()].clone()))
+            .add_child(self.statement())
+    }
 
     fn conditional_statement(&mut self) -> Vec<Node> {
         let mut t = vec![
@@ -876,7 +937,7 @@ impl Parser {
     }
 
     pub fn bool_factor(&mut self) -> Node {
-        let mut t = Node::new();
+        let t: Node;
         let m = self.get_curr();
         match self.get_curr().get_val() {
             Token::Bool(_) | Token::Var(_) | Token::Number(_) | Token::Operator(Op::LParens) => {
@@ -986,10 +1047,12 @@ impl Parser {
         self.lexer.eat(Token::Operator(Op::LParens));
         loop {
             match self.get_curr().get_val() {
-                Token::Operator(Op::LParens) => t.add_child(self.expr().type_(NodeType::Fn_Arg)),
-                Token::Var(_) => t.add_child(self.var_disambiguate().type_(NodeType::Fn_Arg)),
+                Token::Operator(Op::LParens) => {
+                    t = t.add_child(self.expr().type_(NodeType::FnArg))
+                }
+                Token::Var(_) => t = t.add_child(self.var_disambiguate().type_(NodeType::FnArg)),
                 Token::Operator(Op::RParens) => break,
-                Token::Number(_) => t.add_child(self.number().type_(NodeType::Fn_Arg)),
+                Token::Number(_) => t = t.add_child(self.number().type_(NodeType::FnArg)),
                 _ => panic!(
                     "Did not expect {} at position {} in function call args!",
                     self.get_curr().get_val(),
@@ -1024,15 +1087,15 @@ impl Parser {
 
     conditional_statement: IF bool_expr scope (ELSE IF bool_expr scope)* (ELSE scope)?
 
-    return_statement: RETURN VARIABLE
+    return_statement: RETURN expr ()
 
     assign_statement: VARIABLE ASSIGN (expr | bool_expr)
 
-    fn_call: function_name LPARENS args RPARENS
+    fn_call: function_name LPARENS expr RPARENS
 
-    args: (arg SEPARATOR)*
+    args: arg (SEPARATOR arg)*
 
-    arg: expr
+    arg: (QUALIFIER)? VARIABLE
 
     bool_expr: bool_term (OR bool_term)*
 

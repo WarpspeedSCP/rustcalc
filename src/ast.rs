@@ -7,14 +7,16 @@ use parser::TokStruct;
 #[derive(Debug, Clone, PartialEq)]
 #[repr(C)]
 pub enum NodeType {
-    Block = 2,
-    Assignment = 3,
-    AExpression = 4,
-    BExpression = 5,
-    FnCall = 6,
-    Fn_Arg = 7,
-    None = 8,
-    Cond = 9,
+    Block,
+    Assignment,
+    AExpression,
+    BExpression,
+    FnCall,
+    FnDef,
+    FnArg,
+    FnArgs,
+    None,
+    Cond,
 }
 
 #[derive(Debug, Clone)]
@@ -34,22 +36,27 @@ impl Node {
         }
     }
 
-    pub fn add_child(&mut self, n: Node) -> Node {
+    pub fn add_child(mut self, n: Node) -> Node {
         self.children.push(n);
         self.clone()
     }
 
-    pub fn val(&mut self, v: TokStruct) -> Node {
+    pub fn val(mut self, v: TokStruct) -> Node {
         self.val = v;
         self.clone()
     }
 
-    pub fn children(&mut self, c: Vec<Node>) -> Node {
+    pub fn children(mut self, c: Vec<Node>) -> Node {
         self.children = c;
         self.clone()
     }
 
-    pub fn type_(&mut self, t: NodeType) -> Node {
+    pub fn add_children(mut self, c: &mut Vec<Node>) -> Node {
+        self.children.append(c);
+        self
+    }
+
+    pub fn type_(mut self, t: NodeType) -> Node {
         self.n_type = t.clone();
         self.clone()
     }
@@ -58,8 +65,8 @@ impl Node {
         self.val.get_val()
     }
 
-    pub fn get_children(&self) -> Vec<Node> {
-        self.children.clone()
+    pub fn get_children(&self) -> &Vec<Node> {
+        &self.children
     }
 
     pub fn get_pos(&self) -> usize {
