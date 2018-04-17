@@ -769,6 +769,7 @@ impl Parser {
         t
     }
 
+    // A statement block.
     fn statement_list(&mut self) -> Vec<Node> {
         self.lexer.eat(Token::Operator(Op::BlockStart));
         let mut t = vec![self.statement()];
@@ -786,14 +787,19 @@ impl Parser {
         t
     }
 
+    // A statement.
     fn statement(&mut self) -> Node {
         let mut t = Node::new();
 
         match self.get_curr().get_val() {
+            // If it's a nested block.
             Token::Operator(Op::BlockStart) => {
                 t = t.children(self.statement_list()).type_(NodeType::Block);
             }
-            Token::Var(_) | Token::Number(_) => t = self.expr(),
+            // If it is a variable or number, it's an expression.
+            Token::Var(_) | Token::Number(_) | Token::Operator(Op::LParens) => t = self.expr(),
+
+            // Various keywords.
             Token::KeyWord(x) => if x == "if".to_owned() {
                 t = t.children(self.conditional_statement())
                     .type_(NodeType::Cond);
@@ -802,11 +808,11 @@ impl Parser {
             } else if x == "fn".to_owned() {
                 t = self.function();
             },
-            Token::Operator(Op::LParens) => t = self.expr(),
+            // This node is added to the AST so we can also handle intentionally empty statements.
             Token::Operator(Op::LineEnd) => {
                 t = Node::new().val(self.lexer.eat(Token::Operator(Op::LineEnd)));
             }
-            
+            // An empty block.
             Token::Operator(Op::BlockEnd) => if self.lexer.peek_back() == '{' {
                 t = Node::new().type_(NodeType::Block);
             },
@@ -852,14 +858,18 @@ impl Parser {
         t
     }
 
+    // A statement is an assign statement if it contains the assign operator.
     fn assign_statement(&mut self) -> Node {
         Node::new()
+            // The variable we assign to.
             .add_child(self.id().type_(NodeType::Assignment))
             .val(self.lexer.eat(Token::Operator(Op::Assign)))
+            // The expression we want to assign.
             .add_child(self.expr())
             .type_(NodeType::Assignment)
     }
 
+    // A return statement. It returns the value of the nested statement.
     fn return_statement(&mut self) -> Node {
         Node::new()
             .val(self.lexer.eat(KEYWORD_TABLE[&"return".to_owned()].clone()))
@@ -1054,7 +1064,7 @@ impl Parser {
                 Token::Operator(Op::RParens) => break,
                 Token::Number(_) => t = t.add_child(self.number().type_(NodeType::FnArg)),
                 _ => panic!(
-                    "Did not expect {} at position {} in function call args!",
+                    "fn_call: Did not expect {} at position {} in function call args!",
                     self.get_curr().get_val(),
                     self.get_curr().get_pos()
                 ),
