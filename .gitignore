@@ -1,8 +1,10 @@
 
-/target/
+target/
 **/*.rs.bk
 *.log
 *ml
 *.json
-/.*
+.*
 Cargo.lock
+rls/
+*.mp4
