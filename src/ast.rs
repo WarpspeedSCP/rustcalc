@@ -1,4 +1,3 @@
-extern crate std;
 extern crate termion;
 
 use parser::Token;

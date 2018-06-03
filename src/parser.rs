@@ -1,4 +1,3 @@
-extern crate std;
 
 use ast::Node;
 use ast::NodeType;
@@ -544,7 +543,7 @@ impl Lexer {
             self.curr = self.get_next();
         } else {
             panic!(
-                "eat: Expected {:?}, but got {:?} at position {}!",
+                "eat: Expected {}, but got {} at position {}!",
                 token,
                 t.get_val(),
                 self.pos
@@ -592,7 +591,7 @@ impl Parser {
         }
         */
 
-        self.statement()
+        self.function()
     }
 
     // Terminal function to accept a number.
@@ -696,7 +695,6 @@ impl Parser {
     // A term is composed of 1 or more power factors and is defined by the rule-
     //
     // term: pow_factor ((MUL | DIV | MOD | INTDIV) pow_factor)*
-
     pub fn term(&mut self) -> Node {
         let mut t = self.pow_factor();
         let mut m = self.get_curr();
@@ -764,13 +762,16 @@ impl Parser {
                 self.lexer.eat(Token::Operator(Op::Comma));
                 let temp = self.lexer.peek_token();
                 match temp.get_val() {
-                    Token::Operator(Op::RParens) => false,
-                    Token::Var(_) => {
+                    Token::Operator(Op::RParens) => {
+                        m = self.lexer.eat(Token::Var(String::new()));
+                        true
+                    }
+                    Token::Operator(Op::Comma) => {
                         m = self.lexer.eat(Token::Var(String::new()));
                         true
                     }
                     _ => panic!(
-                        "Expected Var or R-parens, got {} at position {}!",
+                        "Expected Comma or R-parens, got {} at position {}!",
                         temp.get_val(),
                         temp.get_pos()
                     ),
@@ -792,8 +793,14 @@ impl Parser {
         t
     }
 
+// fn a (x, y, z) { if x == y return z * 2; else return z / 2; } fn b (l, m) { if a(l, m, 2) > 2 { x = 3; y = 16;  m = (l * x) / y; } else m = 2; return m; }
+
+
     // A non terminal function representing a function definition.
-    //   
+    //   A function defenition consists of the name ofthe function, 
+    //   followed by a parenthesis enclosed set of comma separated 
+    //   arguements, and then the body of the function enclosed in 
+    //   block start and end tokens.
     fn function(&mut self) -> Node {
         self.lexer.eat(KEYWORD_TABLE[&"fn".to_owned()].clone());
         let t = Node::new()
@@ -812,7 +819,9 @@ impl Parser {
     // A statement block.
     fn statement_list(&mut self) -> Vec<Node> {
         self.lexer.eat(Token::Operator(Op::BlockStart));
-        let mut t = vec![self.statement()];
+        let mut t = vec![
+            self.statement()
+        ];
 
         while match self.get_curr().get_val() {
             Token::Operator(Op::BlockEnd) => {
@@ -892,20 +901,32 @@ impl Parser {
 
     // A statement is an assign statement if it contains the assign operator.
     fn assign_statement(&mut self) -> Node {
-        Node::new()
+        let t = Node::new()
             // The variable we assign to.
             .add_child(self.id().type_(NodeType::Assignment))
             .val(self.lexer.eat(Token::Operator(Op::Assign)))
             // The expression we want to assign.
             .add_child(self.expr())
-            .type_(NodeType::Assignment)
+            .type_(NodeType::Assignment);
+
+        if self.get_curr().get_val() == Token::Operator(Op::LineEnd) {
+            self.lexer.eat(Token::Operator(Op::LineEnd));
+        }
+        
+        t
     }
 
     // A return statement. It returns the value of the nested statement.
     fn return_statement(&mut self) -> Node {
-        Node::new()
+        let t = Node::new()
             .val(self.lexer.eat(KEYWORD_TABLE[&"return".to_owned()].clone()))
-            .add_child(self.statement())
+            .add_child(self.statement());
+
+        if self.get_curr().get_val() == Token::Operator(Op::LineEnd) {
+            self.lexer.eat(Token::Operator(Op::LineEnd));
+        }
+
+        t
     }
 
     fn conditional_statement(&mut self) -> Vec<Node> {
@@ -1108,6 +1129,21 @@ impl Parser {
             }
         }
         self.lexer.eat(Token::Operator(Op::RParens));
+
+        t
+    }
+
+    pub fn program(&mut self) -> Node {
+        let mut t = Node::new();
+
+        t = t.add_child(self.function());
+
+        while match self.get_curr().get_val() {
+            Token::None => false,
+            _ => true
+        } {
+            t = t.add_child(self.function());
+        }
 
         t
     }
