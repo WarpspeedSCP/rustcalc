@@ -853,9 +853,11 @@ impl Parser {
                 t = t.children(self.conditional_statement())
                     .type_(NodeType::Cond);
             } else if x == "return".to_owned() {
-                t = self.return_statement();
+                t = self.return_statement()
+                .type_(NodeType::Return);
             } else if x == "fn".to_owned() {
-                t = self.function();
+                t = self.function()
+                .type_(NodeType::FnDef);
             },
             // This node is added to the AST so we can also handle intentionally empty statements.
             Token::Operator(Op::LineEnd) => {
