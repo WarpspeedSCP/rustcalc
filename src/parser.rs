@@ -297,6 +297,20 @@ impl Lexer {
         self.input[self.pos + 1] as char
     }
 
+    fn peek_token(&mut self) -> TokStruct {
+        let cc = self.get_curr();
+        let cp = self.get_pos();
+
+        // Get next token. This will advance the lexer forward by one token.
+        let m = self.get_next();
+
+        // We need to reset thr lexer's position so it doesn't miss a token.
+        self.set_pos(cp);
+        self.set_curr(cc);
+
+        m
+    }
+
     // Peek backward to get the previous non-whitespace character.
     fn peek_back(&self) -> char {
         let mut pb = self.pos - 1;
@@ -668,7 +682,11 @@ impl Parser {
 
         match m.get_val() {
             // If we find Op::Pow, we can continue to get the next power factor.
-            Token::Operator(Op::Pow) => Node::new().val(m).add_child(t).add_child(self.factor()).type_(NodeType::AExpression),
+            Token::Operator(Op::Pow) => Node::new()
+                .val(m)
+                .add_child(t)
+                .add_child(self.factor())
+                .type_(NodeType::AExpression),
             _ => t,
         }
     }
@@ -726,6 +744,10 @@ impl Parser {
         t
     }
 
+    // A non terminal function representing a comma separated arguement list.
+    //   An arguement list must begin with a left parenthesis, and end with
+    //   a right parenthesis. An arguement list can only appear within a
+    //   function defenition or a function call.
     fn arg_list(&mut self) -> Node {
         self.lexer.eat(Token::Operator(Op::LParens));
 
@@ -740,8 +762,19 @@ impl Parser {
             }
             Token::Operator(Op::Comma) => {
                 self.lexer.eat(Token::Operator(Op::Comma));
-                m = self.lexer.eat(Token::Var(String::new()));
-                true
+                let temp = self.lexer.peek_token();
+                match temp.get_val() {
+                    Token::Operator(Op::RParens) => false,
+                    Token::Var(_) => {
+                        m = self.lexer.eat(Token::Var(String::new()));
+                        true
+                    }
+                    _ => panic!(
+                        "Expected Var or R-parens, got {} at position {}!",
+                        temp.get_val(),
+                        temp.get_pos()
+                    ),
+                }
             }
             _ => panic!(
                 "Expected Var, got {} at position {}!",
@@ -749,7 +782,8 @@ impl Parser {
                 m.get_pos()
             ),
         } {
-            t = t.add_child(Node::make_node(m.clone()).type_(NodeType::FnArg)).type_(NodeType::FnArgs);
+            t = t.add_child(Node::make_node(m.clone()).type_(NodeType::FnArg))
+                .type_(NodeType::FnArgs);
             m = self.get_curr();
         }
 
@@ -758,13 +792,19 @@ impl Parser {
         t
     }
 
+    // A non terminal function representing a function definition.
+    //   
     fn function(&mut self) -> Node {
         self.lexer.eat(KEYWORD_TABLE[&"fn".to_owned()].clone());
-        let mut t = Node::new()
+        let t = Node::new()
             .val(self.lexer.eat(Token::Var(String::new())))
             .type_(NodeType::FnDef)
-            .add_child(self.arg_list());
-        t = t.add_child(Node::new().children(self.statement_list()).type_(NodeType::Block));
+            .add_child(self.arg_list())
+            .add_child(
+            Node::new()
+                .children(self.statement_list())
+                .type_(NodeType::Block),
+        );
 
         t
     }
@@ -828,26 +868,18 @@ impl Parser {
 
     // Disambigutes the various node types which hold a Var token
     fn var_disambiguate(&mut self) -> Node {
-        let cc = self.get_curr();
-        let cp = self.lexer.get_pos();
+        let m = self.lexer.peek_token();
         let t: Node;
 
-        // Get next token. This will advance the lexer forward by one token.
-        let m = self.lexer.get_next();
-
-        // We need to reset thr lexer's position so it doesn't miss a token.
-        self.lexer.set_pos(cp);
-        self.lexer.set_curr(cc);
         match m.get_val() {
-            
             // If the next token is a left parenthesis, it can only be a function call.
             Token::Operator(Op::LParens) => t = self.fn_call(),
-            
-            // If the next token is a right parenthesis or a comma, 
+
+            // If the next token is a right parenthesis or a comma,
             //   the variable is probably part of an arg list.
             // This will probably be depreciated.
             Token::Operator(Op::RParens) | Token::Operator(Op::Comma) => t = self.id(),
-            
+
             // If the next token is assign, we return an assign statement node.
             Token::Operator(Op::Assign) => t = self.assign_statement(),
 
@@ -1057,9 +1089,7 @@ impl Parser {
         self.lexer.eat(Token::Operator(Op::LParens));
         loop {
             match self.get_curr().get_val() {
-                Token::Operator(Op::LParens) => {
-                    t = t.add_child(self.expr().type_(NodeType::FnArg))
-                }
+                Token::Operator(Op::LParens) => t = t.add_child(self.expr().type_(NodeType::FnArg)),
                 Token::Var(_) => t = t.add_child(self.var_disambiguate().type_(NodeType::FnArg)),
                 Token::Operator(Op::RParens) => break,
                 Token::Number(_) => t = t.add_child(self.number().type_(NodeType::FnArg)),
