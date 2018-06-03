@@ -591,7 +591,7 @@ impl Parser {
         }
         */
 
-        self.function()
+        self.program()
     }
 
     // Terminal function to accept a number.
@@ -920,6 +920,7 @@ impl Parser {
     fn return_statement(&mut self) -> Node {
         let t = Node::new()
             .val(self.lexer.eat(KEYWORD_TABLE[&"return".to_owned()].clone()))
+            .type_(NodeType::Return)
             .add_child(self.statement());
 
         if self.get_curr().get_val() == Token::Operator(Op::LineEnd) {
@@ -1136,10 +1137,10 @@ impl Parser {
     pub fn program(&mut self) -> Node {
         let mut t = Node::new();
 
-        t = t.add_child(self.function());
+        t = t.add_child(self.function()).type_(NodeType::Program);
 
         while match self.get_curr().get_val() {
-            Token::None => false,
+            Token::None | Token::Operator(Op::LineEnd) => false,
             _ => true
         } {
             t = t.add_child(self.function());

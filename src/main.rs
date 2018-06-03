@@ -6,6 +6,7 @@ extern crate termion;
 mod io;
 mod parser;
 mod ast;
+mod interpreter;
 
 use std::io::Write;
 

@@ -16,6 +16,8 @@ pub enum NodeType {
     FnArgs,
     None,
     Cond,
+    Program,
+    Return
 }
 
 #[derive(Debug, Clone)]
