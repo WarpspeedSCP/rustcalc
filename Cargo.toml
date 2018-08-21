@@ -10,6 +10,8 @@ fst = "*"
 fst-regex = "*"
 #num = "*"
 lazy_static = "*"
-
+serde = "*"
+serde_json = "*"
+serde_derive = "*"
 [features]
 debug = []

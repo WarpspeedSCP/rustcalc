@@ -1,12 +1,17 @@
-#![feature(inclusive_range_syntax)]
 #[macro_use]
 extern crate lazy_static;
+
 extern crate termion;
+extern crate serde_json;
+
+#[macro_use]
+extern crate serde_derive;
 
 mod io;
 mod parser;
+#[macro_use]
 mod ast;
-mod interpreter;
+//mod interpreter;
 
 use std::io::Write;
 
@@ -44,7 +49,7 @@ fn main() {
         //        im.put_line(&"\r\n".to_owned());
     }
 
-    println!("{:?}", d.get_children());
+    println!("{}", serde_json::to_string_pretty(&d).unwrap());
     Node::po_(&d);
 
     /*

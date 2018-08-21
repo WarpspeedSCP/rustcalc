@@ -1,9 +1,8 @@
-extern crate termion;
-
+use serde_json::{Value, Error};
 use parser::Token;
 use parser::TokStruct;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
 pub enum NodeType {
     Block,
@@ -17,39 +16,42 @@ pub enum NodeType {
     None,
     Cond,
     Program,
-    Return
+    Return,
+    Var,
+    Number,
+    Bool
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[repr(C)]
 pub struct Node {
-    children: Vec<Node>,
     val: TokStruct,
+    children: Vec<Node>,
     n_type: NodeType,
 }
 
 impl Node {
     pub fn new() -> Node {
         Node {
+            val: TokStruct::default(),
             children: Vec::new(),
-            val: TokStruct::new(Token::None, 0),
             n_type: NodeType::None,
         }
     }
 
     pub fn add_child(mut self, n: Node) -> Node {
         self.children.push(n);
-        self.clone()
+        self
     }
 
     pub fn val(mut self, v: TokStruct) -> Node {
         self.val = v;
-        self.clone()
+        self
     }
 
     pub fn children(mut self, c: Vec<Node>) -> Node {
         self.children = c;
-        self.clone()
+        self
     }
 
     pub fn add_children(mut self, c: &mut Vec<Node>) -> Node {
@@ -59,7 +61,7 @@ impl Node {
 
     pub fn type_(mut self, t: NodeType) -> Node {
         self.n_type = t.clone();
-        self.clone()
+        self
     }
 
     pub fn get_val(&self) -> Token {
@@ -74,13 +76,6 @@ impl Node {
         self.val.get_pos()
     }
 
-    pub fn make_node(v: TokStruct) -> Node {
-        Node {
-            children: Vec::new(),
-            val: v,
-            n_type: NodeType::None,
-        }
-    }
 
     pub fn po_(n: &Node) {
         for i in &n.children {
@@ -89,4 +84,6 @@ impl Node {
 
         println!("{:?} : {:?}", n.val, n.n_type);
     }
+
 }
+

@@ -1,4 +1,3 @@
-
 use ast::Node;
 use ast::NodeType;
 
@@ -20,7 +19,7 @@ lazy_static! {
         let mut d: SymTable = SymTable::new();
 
         let m = [
-            "state", "if", "else", "elif", "return", "write", "read", "for", "in", "array", "fn"
+            "state", "if", "else", "elif", "return", "write", "read", "for", "in", "array", "fn",
         ];
 
         for i in 0..m.len() {
@@ -32,7 +31,7 @@ lazy_static! {
 }
 
 // Enum of operator IDs recognised by the parser.
-#[derive(Clone, Debug, Eq, Hash)]
+#[derive(Clone, Debug, Eq, Hash, Serialize, Deserialize)]
 #[repr(C)]
 pub enum Op {
     Add,
@@ -77,7 +76,7 @@ impl PartialEq for Op {
 }
 
 // Enum of token types recognised by the parser.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[repr(C)]
 pub enum Token {
     Number(f64),
@@ -110,7 +109,7 @@ impl PartialEq for Token {
 impl Eq for Token {}
 
 // Wrapper for the Token enum, which adds a position variable for easy debugging.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[repr(C)]
 pub struct TokStruct {
     val: Token,
@@ -128,6 +127,15 @@ impl TokStruct {
 
     pub fn get_pos(&self) -> usize {
         self.pos
+    }
+}
+
+impl Default for TokStruct {
+    fn default() -> TokStruct {
+        TokStruct {
+            val: Token::None,
+            pos: 0,
+        }
     }
 }
 
@@ -596,17 +604,23 @@ impl Parser {
 
     // Terminal function to accept a number.
     fn number(&mut self) -> Node {
-        Node::make_node(self.lexer.eat(Token::Number(0.))).type_(NodeType::AExpression)
+        Node::new()
+            .val(self.lexer.eat(Token::Number(0.)))
+            .type_(NodeType::Number)
     }
 
     // Terminal function to accept an identifier.
     fn id(&mut self) -> Node {
-        Node::make_node(self.lexer.eat(Token::Var(String::new())))
+        Node::new()
+            .val(self.lexer.eat(Token::Var(String::new())))
+            .type_(NodeType::Var)
     }
 
     // Terminal function to accept a boolean value.
     fn boolean(&mut self) -> Node {
-        Node::make_node(self.lexer.eat(Token::Bool(true))).type_(NodeType::BExpression)
+        Node::new()
+            .val(self.lexer.eat(Token::Bool(true)))
+            .type_(NodeType::Bool)
     }
 
     // Non terminal function to accept a factor.
@@ -614,7 +628,7 @@ impl Parser {
     //
     // factor: NUMBER | VARIABLE | fn_call | LPARENS expr RPARENS | POW pow_factor | (POS | NEG) factor
     pub fn factor(&mut self) -> Node {
-        let mut t = Node::new();
+        let mut t: Node;
         let m = self.get_curr();
 
         match m.get_val() {
@@ -652,7 +666,7 @@ impl Parser {
                     .add_child(self.factor())
             }
             // To prevent errors when we get an empty input sequence.
-            Token::None => t = t.val(TokStruct::new(Token::None, 0)),
+            Token::None => t = Node::new().val(TokStruct::default()),
             _ => panic!(
                 "factor: Expected Number or Variable at position {}, got {}!",
                 m.get_pos(),
@@ -707,10 +721,11 @@ impl Parser {
             | Token::Operator(Op::IntDiv) => true,
             _ => false,
         } {
-            t = Node::make_node(self.lexer.eat(m.get_val()))
+            t = Node::new()
+                .val(self.lexer.eat(m.get_val()))
+                .type_(NodeType::AExpression)
                 .add_child(t)
-                .add_child(self.pow_factor())
-                .type_(NodeType::AExpression);
+                .add_child(self.pow_factor());
             m = self.get_curr();
         }
 
@@ -732,10 +747,11 @@ impl Parser {
             Token::Operator(Op::Add) | Token::Operator(Op::Sub) => true,
             _ => false,
         } {
-            t = Node::make_node(self.lexer.eat(m.get_val()))
+            t = Node::new()
+                .val(self.lexer.eat(m.get_val()))
+                .type_(NodeType::AExpression)
                 .add_child(t)
-                .add_child(self.term())
-                .type_(NodeType::AExpression);
+                .add_child(self.term());
             m = self.get_curr();
         }
 
@@ -783,7 +799,10 @@ impl Parser {
                 m.get_pos()
             ),
         } {
-            t = t.add_child(Node::make_node(m.clone()).type_(NodeType::FnArg))
+            t = t.add_child(
+                    Node::new()
+                    .val(m.clone())
+                    .type_(NodeType::FnArg))
                 .type_(NodeType::FnArgs);
             m = self.get_curr();
         }
@@ -793,13 +812,12 @@ impl Parser {
         t
     }
 
-// fn a (x, y, z) { if x == y return z * 2; else return z / 2; } fn b (l, m) { if a(l, m, 2) > 2 { x = 3; y = 16;  m = (l * x) / y; } else m = 2; return m; }
-
+    // fn a (x, y, z) { if x == y return z * 2; else return z / 2; } fn b (l, m) { if a(l, m, 2) > 2 { x = 3; y = 16;  m = (l * x) / y; } else m = 2; return m; }
 
     // A non terminal function representing a function definition.
-    //   A function defenition consists of the name ofthe function, 
-    //   followed by a parenthesis enclosed set of comma separated 
-    //   arguements, and then the body of the function enclosed in 
+    //   A function defenition consists of the name ofthe function,
+    //   followed by a parenthesis enclosed set of comma separated
+    //   arguements, and then the body of the function enclosed in
     //   block start and end tokens.
     fn function(&mut self) -> Node {
         self.lexer.eat(KEYWORD_TABLE[&"fn".to_owned()].clone());
@@ -808,10 +826,10 @@ impl Parser {
             .type_(NodeType::FnDef)
             .add_child(self.arg_list())
             .add_child(
-            Node::new()
-                .children(self.statement_list())
-                .type_(NodeType::Block),
-        );
+                Node::new()
+                    .type_(NodeType::Block)
+                    .children(self.statement_list()),
+            );
 
         t
     }
@@ -819,9 +837,7 @@ impl Parser {
     // A statement block.
     fn statement_list(&mut self) -> Vec<Node> {
         self.lexer.eat(Token::Operator(Op::BlockStart));
-        let mut t = vec![
-            self.statement()
-        ];
+        let mut t = vec![self.statement()];
 
         while match self.get_curr().get_val() {
             Token::Operator(Op::BlockEnd) => {
@@ -850,14 +866,13 @@ impl Parser {
 
             // Various keywords.
             Token::KeyWord(x) => if x == "if".to_owned() {
-                t = t.children(self.conditional_statement())
+                t = t
+                    .children(self.conditional_statement())
                     .type_(NodeType::Cond);
             } else if x == "return".to_owned() {
-                t = self.return_statement()
-                .type_(NodeType::Return);
+                t = self.return_statement().type_(NodeType::Return);
             } else if x == "fn".to_owned() {
-                t = self.function()
-                .type_(NodeType::FnDef);
+                t = self.function().type_(NodeType::FnDef);
             },
             // This node is added to the AST so we can also handle intentionally empty statements.
             Token::Operator(Op::LineEnd) => {
@@ -914,7 +929,7 @@ impl Parser {
         if self.get_curr().get_val() == Token::Operator(Op::LineEnd) {
             self.lexer.eat(Token::Operator(Op::LineEnd));
         }
-        
+
         t
     }
 
@@ -1143,7 +1158,7 @@ impl Parser {
 
         while match self.get_curr().get_val() {
             Token::None | Token::Operator(Op::LineEnd) => false,
-            _ => true
+            _ => true,
         } {
             t = t.add_child(self.function());
         }

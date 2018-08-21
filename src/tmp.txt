@@ -1,0 +1,548 @@
+{
+    "val": {
+      "val": "None",
+      "pos": 0
+    },
+    "children": [
+      {
+        "val": {
+          "val": {
+            "Var": "a"
+          },
+          "pos": 4
+        },
+        "children": [
+          {
+            "val": {
+              "val": "None",
+              "pos": 0
+            },
+            "children": [
+              {
+                "val": {
+                  "val": {
+                    "Var": "x"
+                  },
+                  "pos": 7
+                },
+                "children": [],
+                "n_type": "FnArg"
+              },
+              {
+                "val": {
+                  "val": {
+                    "Var": "y"
+                  },
+                  "pos": 10
+                },
+                "children": [],
+                "n_type": "FnArg"
+              },
+              {
+                "val": {
+                  "val": {
+                    "Var": "z"
+                  },
+                  "pos": 13
+                },
+                "children": [],
+                "n_type": "FnArg"
+              }
+            ],
+            "n_type": "FnArgs"
+          },
+          {
+            "val": {
+              "val": "None",
+              "pos": 0
+            },
+            "children": [
+              {
+                "val": {
+                  "val": "None",
+                  "pos": 0
+                },
+                "children": [
+                  {
+                    "val": {
+                      "val": {
+                        "KeyWord": "if"
+                      },
+                      "pos": 19
+                    },
+                    "children": [],
+                    "n_type": "Cond"
+                  },
+                  {
+                    "val": {
+                      "val": {
+                        "Operator": "Eq_"
+                      },
+                      "pos": 24
+                    },
+                    "children": [
+                      {
+                        "val": {
+                          "val": {
+                            "Var": "x"
+                          },
+                          "pos": 21
+                        },
+                        "children": [],
+                        "n_type": "Var"
+                      },
+                      {
+                        "val": {
+                          "val": {
+                            "Var": "y"
+                          },
+                          "pos": 26
+                        },
+                        "children": [],
+                        "n_type": "Var"
+                      }
+                    ],
+                    "n_type": "BExpression"
+                  },
+                  {
+                    "val": {
+                      "val": {
+                        "KeyWord": "return"
+                      },
+                      "pos": 33
+                    },
+                    "children": [
+                      {
+                        "val": {
+                          "val": {
+                            "Operator": "Mul"
+                          },
+                          "pos": 37
+                        },
+                        "children": [
+                          {
+                            "val": {
+                              "val": {
+                                "Var": "z"
+                              },
+                              "pos": 35
+                            },
+                            "children": [],
+                            "n_type": "Var"
+                          },
+                          {
+                            "val": {
+                              "val": {
+                                "Number": 2.0
+                              },
+                              "pos": 39
+                            },
+                            "children": [],
+                            "n_type": "Number"
+                          }
+                        ],
+                        "n_type": "AExpression"
+                      }
+                    ],
+                    "n_type": "Return"
+                  },
+                  {
+                    "val": {
+                      "val": {
+                        "KeyWord": "else"
+                      },
+                      "pos": 45
+                    },
+                    "children": [],
+                    "n_type": "Cond"
+                  },
+                  {
+                    "val": {
+                      "val": {
+                        "KeyWord": "return"
+                      },
+                      "pos": 52
+                    },
+                    "children": [
+                      {
+                        "val": {
+                          "val": {
+                            "Operator": "Div"
+                          },
+                          "pos": 56
+                        },
+                        "children": [
+                          {
+                            "val": {
+                              "val": {
+                                "Var": "z"
+                              },
+                              "pos": 54
+                            },
+                            "children": [],
+                            "n_type": "Var"
+                          },
+                          {
+                            "val": {
+                              "val": {
+                                "Number": 2.0
+                              },
+                              "pos": 58
+                            },
+                            "children": [],
+                            "n_type": "Number"
+                          }
+                        ],
+                        "n_type": "AExpression"
+                      }
+                    ],
+                    "n_type": "Return"
+                  }
+                ],
+                "n_type": "Cond"
+              }
+            ],
+            "n_type": "Block"
+          }
+        ],
+        "n_type": "FnDef"
+      },
+      {
+        "val": {
+          "val": {
+            "Var": "b"
+          },
+          "pos": 66
+        },
+        "children": [
+          {
+            "val": {
+              "val": "None",
+              "pos": 0
+            },
+            "children": [
+              {
+                "val": {
+                  "val": {
+                    "Var": "l"
+                  },
+                  "pos": 69
+                },
+                "children": [],
+                "n_type": "FnArg"
+              },
+              {
+                "val": {
+                  "val": {
+                    "Var": "m"
+                  },
+                  "pos": 72
+                },
+                "children": [],
+                "n_type": "FnArg"
+              }
+            ],
+            "n_type": "FnArgs"
+          },
+          {
+            "val": {
+              "val": "None",
+              "pos": 0
+            },
+            "children": [
+              {
+                "val": {
+                  "val": "None",
+                  "pos": 0
+                },
+                "children": [
+                  {
+                    "val": {
+                      "val": {
+                        "KeyWord": "if"
+                      },
+                      "pos": 78
+                    },
+                    "children": [],
+                    "n_type": "Cond"
+                  },
+                  {
+                    "val": {
+                      "val": {
+                        "Operator": "Gt_"
+                      },
+                      "pos": 91
+                    },
+                    "children": [
+                      {
+                        "val": {
+                          "val": {
+                            "Var": "a"
+                          },
+                          "pos": 80
+                        },
+                        "children": [
+                          {
+                            "val": {
+                              "val": {
+                                "Var": "l"
+                              },
+                              "pos": 82
+                            },
+                            "children": [],
+                            "n_type": "FnArg"
+                          },
+                          {
+                            "val": {
+                              "val": {
+                                "Var": "m"
+                              },
+                              "pos": 85
+                            },
+                            "children": [],
+                            "n_type": "FnArg"
+                          },
+                          {
+                            "val": {
+                              "val": {
+                                "Number": 2.0
+                              },
+                              "pos": 88
+                            },
+                            "children": [],
+                            "n_type": "FnArg"
+                          }
+                        ],
+                        "n_type": "FnCall"
+                      },
+                      {
+                        "val": {
+                          "val": {
+                            "Number": 2.0
+                          },
+                          "pos": 93
+                        },
+                        "children": [],
+                        "n_type": "BExpression"
+                      }
+                    ],
+                    "n_type": "BExpression"
+                  },
+                  {
+                    "val": {
+                      "val": "None",
+                      "pos": 0
+                    },
+                    "children": [
+                      {
+                        "val": {
+                          "val": {
+                            "Operator": "Assign"
+                          },
+                          "pos": 99
+                        },
+                        "children": [
+                          {
+                            "val": {
+                              "val": {
+                                "Var": "x"
+                              },
+                              "pos": 97
+                            },
+                            "children": [],
+                            "n_type": "Assignment"
+                          },
+                          {
+                            "val": {
+                              "val": {
+                                "Number": 3.0
+                              },
+                              "pos": 101
+                            },
+                            "children": [],
+                            "n_type": "Number"
+                          }
+                        ],
+                        "n_type": "Assignment"
+                      },
+                      {
+                        "val": {
+                          "val": {
+                            "Operator": "Assign"
+                          },
+                          "pos": 106
+                        },
+                        "children": [
+                          {
+                            "val": {
+                              "val": {
+                                "Var": "y"
+                              },
+                              "pos": 104
+                            },
+                            "children": [],
+                            "n_type": "Assignment"
+                          },
+                          {
+                            "val": {
+                              "val": {
+                                "Number": 16.0
+                              },
+                              "pos": 109
+                            },
+                            "children": [],
+                            "n_type": "Number"
+                          }
+                        ],
+                        "n_type": "Assignment"
+                      },
+                      {
+                        "val": {
+                          "val": {
+                            "Operator": "Assign"
+                          },
+                          "pos": 115
+                        },
+                        "children": [
+                          {
+                            "val": {
+                              "val": {
+                                "Var": "m"
+                              },
+                              "pos": 113
+                            },
+                            "children": [],
+                            "n_type": "Assignment"
+                          },
+                          {
+                            "val": {
+                              "val": {
+                                "Operator": "Div"
+                              },
+                              "pos": 125
+                            },
+                            "children": [
+                              {
+                                "val": {
+                                  "val": {
+                                    "Operator": "Mul"
+                                  },
+                                  "pos": 120
+                                },
+                                "children": [
+                                  {
+                                    "val": {
+                                      "val": {
+                                        "Var": "l"
+                                      },
+                                      "pos": 118
+                                    },
+                                    "children": [],
+                                    "n_type": "Var"
+                                  },
+                                  {
+                                    "val": {
+                                      "val": {
+                                        "Var": "x"
+                                      },
+                                      "pos": 122
+                                    },
+                                    "children": [],
+                                    "n_type": "Var"
+                                  }
+                                ],
+                                "n_type": "AExpression"
+                              },
+                              {
+                                "val": {
+                                  "val": {
+                                    "Var": "y"
+                                  },
+                                  "pos": 127
+                                },
+                                "children": [],
+                                "n_type": "Var"
+                              }
+                            ],
+                            "n_type": "AExpression"
+                          }
+                        ],
+                        "n_type": "Assignment"
+                      }
+                    ],
+                    "n_type": "Block"
+                  },
+                  {
+                    "val": {
+                      "val": {
+                        "KeyWord": "else"
+                      },
+                      "pos": 135
+                    },
+                    "children": [],
+                    "n_type": "Cond"
+                  },
+                  {
+                    "val": {
+                      "val": {
+                        "Operator": "Assign"
+                      },
+                      "pos": 139
+                    },
+                    "children": [
+                      {
+                        "val": {
+                          "val": {
+                            "Var": "m"
+                          },
+                          "pos": 137
+                        },
+                        "children": [],
+                        "n_type": "Assignment"
+                      },
+                      {
+                        "val": {
+                          "val": {
+                            "Number": 2.0
+                          },
+                          "pos": 141
+                        },
+                        "children": [],
+                        "n_type": "Number"
+                      }
+                    ],
+                    "n_type": "Assignment"
+                  }
+                ],
+                "n_type": "Cond"
+              },
+              {
+                "val": {
+                  "val": {
+                    "KeyWord": "return"
+                  },
+                  "pos": 149
+                },
+                "children": [
+                  {
+                    "val": {
+                      "val": {
+                        "Var": "m"
+                      },
+                      "pos": 151
+                    },
+                    "children": [],
+                    "n_type": "Var"
+                  }
+                ],
+                "n_type": "Return"
+              }
+            ],
+            "n_type": "Block"
+          }
+        ],
+        "n_type": "FnDef"
+      }
+    ],
+    "n_type": "Program"
+  }
