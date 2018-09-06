@@ -1177,7 +1177,7 @@ impl Parser {
 
     statement_list: statement LINE_END statement_list
 
-    statement: expr | fn_call | scope | assign_statement | return_statement | conditional_statement
+    statement: expr | scope | assign_statement | return_statement | conditional_statement
 
     conditional_statement: IF bool_expr scope (ELSE IF bool_expr scope)* (ELSE scope)?
 

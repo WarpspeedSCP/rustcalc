@@ -1,6 +1,9 @@
+use parser::Op;
 use serde_json::{Value, Error};
 use parser::Token;
 use parser::TokStruct;
+
+
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[repr(C)]
@@ -20,6 +23,125 @@ pub enum NodeType {
     Var,
     Number,
     Bool
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+pub struct Sym {
+    name: String
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+pub enum Num {
+    Int(i64),
+    Float(f64)
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+pub enum Terminal {
+    Number(Num),
+    String(String),
+    Symbol(Sym)
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+pub enum Sign {
+    Pos,
+    Neg
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+pub struct ArgList {
+    argc: u8,
+    argv: Vec<Factor>
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub struct FnCall {
+    name: String,
+    args: ArgList
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub enum Factor {
+    Terminal(Terminal),
+    FnCall(Box<FnCall>),
+    Expr(Box<Expr>),
+    Power {
+        base: Box<Factor>, 
+        exponent: Box<Factor>
+    },
+    Signed {
+        val: Box<Factor>,
+        sign: Sign
+    },
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub enum Expr {
+    Binary {
+        left: Box<Factor>,
+        right: Box<Factor>,
+        op: Op
+    },
+    Unary {
+        right: Box<Factor>,
+        op: Op
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub enum Statement {
+    Expr(Box<Expr>),
+    Assignment(Box<AssignStmt>),
+    Return(Box<ReturnStmt>),
+    Condition(Box<ConditionalStmt>),
+    Scope(Box<Scope>)
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub struct Scope {
+    contents: Vec<Statement>
+}
+
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub struct AssignStmt {
+    left: Terminal,
+    right: Box<Factor>
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub struct ReturnStmt {
+    val: Box<Factor>
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[repr(C)]
+#[allow(unused)]
+pub struct ConditionalStmt {
+    condition: Box<Factor>,
+    body: Box<Scope>,
+    alternates: Vec<ConditionalStmt>,
+    else_: Option<Scope>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
