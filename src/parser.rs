@@ -1,7 +1,15 @@
-use ast::Node;
-use ast::NodeType;
-
-use ast::{Program, ArgList, Factor, Expr, Statement, Scope, Function, FnCall, ArgDeclList, CondBlock };
+use ast::{
+    ArgDeclList, 
+    ArgList, 
+    CondBlock, 
+    Expr, 
+    Factor, 
+    FnCall, 
+    Function, 
+    Program, 
+    Scope, 
+    Statement
+};
 
 use std::fmt;
 

@@ -98,7 +98,7 @@ impl Trie {
                     Some(x) => x as *mut Trie,
                     None => {
                         (*m).children.insert(
-                            (d[i] as char),
+                            d[i] as char,
                             Trie::new().val(&String::from(string.get(..=i).unwrap())),
                         );
                         (*m).children.get_mut(&(d[i] as char)).unwrap()
