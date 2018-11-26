@@ -144,7 +144,7 @@ impl PartialEq for Token {
 impl Eq for Token {}
 
 // Wrapper for the Token enum, which adds a position variable for easy debugging.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 #[repr(C)]
 pub struct TokStruct {
     val: Token,

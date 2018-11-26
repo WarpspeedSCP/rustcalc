@@ -1,7 +1,3 @@
-extern crate fst;
-extern crate fst_regex;
-extern crate scribe;
-extern crate std;
 extern crate termion;
 
 use termion::raw::RawTerminal;
