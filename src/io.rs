@@ -40,8 +40,8 @@ impl Trie {
         }
     }
 
-    fn val(mut self, v: &String) -> Trie {
-        self.val = Some(v.clone());
+    fn val(mut self, v: &str) -> Trie {
+        self.val = Some(v.to_owned());
         self
     }
 
@@ -185,6 +185,7 @@ impl InputManager {
         self.pos.x = prompt.len() as u16;
         let pl = prompt.len() as u16;
         let mut h_index = self.history.len();
+        let mut prev_char = '`';
 
         // The main input loop
         for c in input.keys() {
@@ -200,6 +201,9 @@ impl InputManager {
             match c.unwrap() {
                 // When we press Return.
                 Key::Char('\n') => {
+                    if prev_char == '\\' {
+                        continue
+                    }
                     self.history.push(out.to_string());
                     self.pos.y += 1;
                     break;
@@ -214,14 +218,15 @@ impl InputManager {
                     if self.pos.x - pl == out.to_string().len() as u16 {
                         // Nothing fancy to do; increment position on the screen and print the new character at the end.
                         self.pos.x += 1;
-
-                        out.insert(
-                            &c.to_string(),
-                            &scribe::buffer::Position {
-                                line: 0,
-                                offset: (self.pos.x - pl as u16 - 1) as usize,
-                            },
-                        );
+                        if c != '\\' {
+                            out.insert(
+                                &c.to_string(),
+                                &scribe::buffer::Position {
+                                    line: 0,
+                                    offset: (self.pos.x - pl as u16 - 1) as usize,
+                                },
+                            );
+                        }
 
                         write!(self.terminal, "{}{}", Goto(self.pos.x, self.pos.y), c).unwrap();
                     }
@@ -230,14 +235,15 @@ impl InputManager {
                         let tmp = &out.to_string()[(self.pos.x - pl) as usize..];
 
                         self.pos.x += 1;
-
-                        out.insert(
-                            &c.to_string(),
-                            &scribe::buffer::Position {
-                                line: 0,
-                                offset: (self.pos.x - pl - 1) as usize,
-                            },
-                        );
+                        if c != '\\' {
+                            out.insert(
+                                &c.to_string(),
+                                &scribe::buffer::Position {
+                                    line: 0,
+                                    offset: (self.pos.x - pl - 1) as usize,
+                                },
+                            );
+                        }
 
                         write!(
                             self.terminal,
@@ -267,15 +273,17 @@ impl InputManager {
                             },
                         ));
 
-                        self.pos.x += 1;
+                        if c != '\\' {
+                            out.insert(
+                                &c.to_string(),
+                                &scribe::buffer::Position {
+                                    line: 0,
+                                    offset: (self.pos.x - pl as u16) as usize,
+                                },
+                            );
+                        }
 
-                        out.insert(
-                            &c.to_string(),
-                            &scribe::buffer::Position {
-                                line: 0,
-                                offset: (self.pos.x - pl as u16 - 1) as usize,
-                            },
-                        );
+                        self.pos.x += 1;
 
                         write!(
                             self.terminal,
@@ -285,6 +293,7 @@ impl InputManager {
                             Goto(self.pos.x, self.pos.y)
                         ).unwrap();
                     }
+                    prev_char = c;
                 }
 
                 // Alt doesn't do anything yet.

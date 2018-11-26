@@ -1,6 +1,17 @@
 #[macro_use]
 extern crate lazy_static;
 
+extern crate ordered_float;
+
+#[macro_use]
+extern crate node_t_derive;
+
+#[macro_use]
+extern crate terminal_node_derive;
+
+#[macro_use]
+extern crate encapsulating_node_derive;
+
 extern crate termion;
 extern crate serde_json;
 
@@ -19,24 +30,27 @@ use io::InputManager;
 //use ast::SymTable;
 use ast::Node;
 
+/*
+fn a (x, y, z) { if x == y return z * 2; else return z / 2; } fn b (l, m) { if a(l, m, 2) > 2 { x = 3; y = 16;  m = (l * x) / y; } else m = 2; return m; }
+*/
 fn main() {
     let mut history: Vec<String> = Vec::new();
     let mut a: String = String::new();
     let mut parser = parser::Parser::new();
-    let mut d = Node::new();
+    let mut d = ast::Program::default();
 
     //let mut sym_table = SymTable::new();
 
     //*
     {
         let mut input = std::io::stdin();
-        let mut p: io::Point = io::Point::new(1, 1);
+        //let mut p: io::Point = io::Point::new(1, 1);
         //let mut im = InputManager::new();
 
         //im.clear_all();
 
         while a != String::from("exit") {
-            input.read_line(&mut a); //im.get_line(&"prompt:>".to_owned(), &mut input);
+            input.read_line(&mut a).expect("Could not read line from input."); //im.get_line(&"prompt:>".to_owned(), &mut input);
 
             parser.input(a.clone());
 
@@ -49,8 +63,8 @@ fn main() {
         //        im.put_line(&"\r\n".to_owned());
     }
 
-    println!("{}", serde_json::to_string_pretty(&d).unwrap());
-    Node::po_(&d);
+    println!("{:#?}", d);
+    //Node::po_(&d);
 
     /*
     {
