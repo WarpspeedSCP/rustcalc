@@ -50,7 +50,7 @@ lazy_static! {
 }
 
 // Enum of operator IDs recognised by the parser.
-#[derive(Clone, Debug, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, Hash)]
 #[repr(C)]
 pub enum Op {
     Add,
@@ -95,7 +95,7 @@ impl PartialEq for Op {
 }
 
 // Enum of token types recognised by the parser.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 #[repr(C)]
 pub enum Token {
     Number(f64),

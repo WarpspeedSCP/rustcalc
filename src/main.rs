@@ -13,10 +13,6 @@ extern crate terminal_node_derive;
 extern crate encapsulating_node_derive;
 
 extern crate termion;
-extern crate serde_json;
-
-#[macro_use]
-extern crate serde_derive;
 
 mod io;
 mod parser;
@@ -28,7 +24,6 @@ use std::io::Write;
 
 use io::InputManager;
 //use ast::SymTable;
-use ast::Node;
 
 /*
 fn a (x, y, z) { if x == y return z * 2; else return z / 2; } fn b (l, m) { if a(l, m, 2) > 2 { x = 3; y = 16;  m = (l * x) / y; } else m = 2; return m; }
